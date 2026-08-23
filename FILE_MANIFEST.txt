@@ -2,6 +2,7 @@
 .github/workflows/release.yml
 .gitignore
 CHANGELOG.md
+FILE_MANIFEST.txt
 PROJECT_STATE.md
 README.md
 android/app/build.gradle.kts

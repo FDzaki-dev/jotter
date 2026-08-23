@@ -1,6 +1,12 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch1] — 2026-08-23 (TERBARU)
+## [v1_Batch2] — 2026-08-23 (TERBARU)
+Fix: CI gagal di step "Build release APK" — Flutter stable resolve ke 3.47.1 yang butuh Gradle >= 8.14.0, wrapper masih 8.6. Sumber: analisa `Jotter_secrets.txt`-independen log GitHub Actions (`8_Build release APK.txt`) yang diupload user.
+- Diubah: `android/gradle/wrapper/gradle-wrapper.properties` -> distributionUrl gradle-8.14-all.zip (1 file, sesuai batch limit)
+- Belum diverifikasi compile (masih sandbox tanpa Flutter SDK) — cek run CI berikutnya
+- Pending jika masih gagal: AGP 8.3.2 mungkin perlu naik juga (AGP punya batas atas versi Gradle yang didukung) — akan ditangani batch berikutnya jika muncul error baru terkait AGP/Gradle compatibility
+
+## [v1_Batch1] — 2026-08-23
 Status: Initial build lengkap. BELUM di-compile lokal (sandbox tanpa Flutter SDK/network) — validasi pertama terjadi di GitHub Actions CI saat push ke main.
 
 ### Arsitektur

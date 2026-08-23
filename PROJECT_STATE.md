@@ -1,6 +1,13 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch2] — 2026-08-23 (TERBARU)
+## [v1_Batch3] — 2026-08-23 (TERBARU)
+Fix: CI gagal lagi di "Build release APK" — Gradle 8.14 sukses diterapkan, TAPI AGP 8.3.2 < minimum Flutter 8.11.1. Sumber: log `0_build.txt` (CI run setelah Batch2).
+- Diubah: `android/settings.gradle.kts` -> AGP 8.3.2 -> 8.11.1 (1 file, sesuai batch limit)
+- Gradle 8.14 TIDAK diubah lagi (sudah cukup, warning "upgrade to 9.1.0 soon" hanya deprecation notice bukan error, akan ditangani terpisah jika benar2 di-drop)
+- Belum diverifikasi compile — cek run CI berikutnya
+- Pending: jika AGP 8.11.1 masih trigger "AGP 9+ new DSL" warning/error, kemungkinan perlu migrasi ke DSL baru — batch berikutnya
+
+## [v1_Batch2] — 2026-08-23
 Fix: CI gagal di step "Build release APK" — Flutter stable resolve ke 3.47.1 yang butuh Gradle >= 8.14.0, wrapper masih 8.6. Sumber: analisa `Jotter_secrets.txt`-independen log GitHub Actions (`8_Build release APK.txt`) yang diupload user.
 - Diubah: `android/gradle/wrapper/gradle-wrapper.properties` -> distributionUrl gradle-8.14-all.zip (1 file, sesuai batch limit)
 - Belum diverifikasi compile (masih sandbox tanpa Flutter SDK) — cek run CI berikutnya

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:provider/provider.dart';
 import 'providers/notes_provider.dart';
 import 'providers/settings_provider.dart';

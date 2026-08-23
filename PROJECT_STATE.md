@@ -1,6 +1,14 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch4] — 2026-08-23 (TERBARU)
+## [v1_Batch5] — 2026-08-23 (TERBARU)
+Progress: Gradle/AGP/Kotlin phase kini LOLOS (cuma warning, tidak lagi blocking). Build maju sampai tahap kompilasi Dart (kernel_snapshot_program) dan gagal di 2 error compiler nyata — bukan lagi soal versi toolchain. Sumber: `0_build.txt` (CI run setelah Batch4).
+- Fix 1: `lib/app.dart` -> `Material`/`MaterialType` tidak terdefinisi karena hanya import cupertino.dart (tidak otomatis meng-export widget Material). Ditambahkan `import 'package:flutter/material.dart' show Material, MaterialType;`
+- Fix 2: `lib/services/notification_service.dart` -> `zonedSchedule` di flutter_local_notifications 17.2.4 (versi resolved CI) TERNYATA masih mewajibkan parameter `uiLocalNotificationDateInterpretation` (dugaan sebelumnya di Batch1 bahwa param ini sudah dihapus di v17 TERBUKTI SALAH). Parameter dikembalikan.
+- 2 file diubah (dalam batas 3 file, 1 task: "perbaiki error compiler dari log ini")
+- Toolchain versi (Gradle 8.14 / AGP 8.11.1 / Kotlin 2.2.20) TIDAK diubah lagi — sudah lolos tahap itu
+- Belum diverifikasi compile penuh — cek run CI berikutnya. Tidak ada error compiler lain yang tercatat di log ini di luar 2 di atas.
+
+## [v1_Batch4] — 2026-08-23
 Fix: CI gagal lagi — Gradle 8.14 & AGP 8.11.1 sekarang hanya warning (bukan blocker), TAPI Kotlin 2.0.0 < minimum Flutter 2.2.20. Sumber: log `0_build.txt` (CI run setelah Batch3).
 - Diubah: `android/settings.gradle.kts` -> Kotlin 1.9.24 -> 2.2.20 (1 file, sesuai batch limit)
 - Warning aktif (belum blocking, diabaikan dulu): Gradle disarankan naik ke 9.1.0+, AGP disarankan naik ke 9.0.1+ — akan ditangani jika Flutter benar2 men-drop dukungan versi saat ini

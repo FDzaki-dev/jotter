@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch7] - 2026-08-23
+### Fixed
+- android/app/build.gradle.kts: enable core library desugaring + add desugar_jdk_libs dependency (required by flutter_local_notifications)
+
 ## [v1_Batch6] - 2026-08-23
 ### Fixed
 - pubspec.yaml: flutter_timezone 1.0.8 -> 5.1.0 (1.0.8 used removed Flutter v1 plugin embedding API)

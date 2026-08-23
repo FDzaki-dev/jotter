@@ -1,6 +1,13 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch6] — 2026-08-23 (TERBARU)
+## [v1_Batch7] — 2026-08-23 (TERBARU)
+Progress: flutter_timezone compile LOLOS (fix Batch6 berhasil). Build maju lebih jauh lagi sampai task `:app:checkReleaseAarMetadata`.
+- Root cause: `flutter_local_notifications` mewajibkan core library desugaring diaktifkan (requirement standar & terdokumentasi resmi untuk plugin ini) — belum diaktifkan di project.
+- Fix: `android/app/build.gradle.kts` -> `compileOptions.isCoreLibraryDesugaringEnabled = true` + dependency `coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")`
+- 1 file diubah, 1 task
+- Belum diverifikasi compile penuh — cek run CI berikutnya
+
+## [v1_Batch6] — 2026-08-23
 Progress: Kedua fix Dart di Batch5 LOLOS kompilasi (Material import + notification param, tidak muncul lagi di log). Error baru: dependency pihak ketiga usang.
 - Root cause: `flutter_timezone: ^1.0.8` resolve ke versi lama yang pakai Flutter plugin embedding v1 (`Registrar`/`messenger`) yang sudah DIHAPUS dari Flutter modern -> `flutter_timezone:compileReleaseKotlin` gagal compile.
 - Fix: `pubspec.yaml` -> `flutter_timezone: ^5.1.0` (versi resolved terkonfirmasi tersedia dari log pub get sebelumnya)

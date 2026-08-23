@@ -1,0 +1,28 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Android
+android/local.properties
+android/key.properties
+key.properties
+*.keystore
+*.jks
+release.keystore
+android/.gradle/
+android/captures/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+release.keystore

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v1_Batch6] - 2026-08-23
+### Fixed
+- pubspec.yaml: flutter_timezone 1.0.8 -> 5.1.0 (1.0.8 used removed Flutter v1 plugin embedding API)
+- notification_service.dart: adapt to flutter_timezone 5.x API change (getLocalTimezone() now returns TimezoneInfo, not String)
+- Confirmed via pub.dev docs (web search), not guesswork
+
 ## [v1_Batch5] - 2026-08-23
 ### Fixed
 - lib/app.dart: import material.dart for Material/MaterialType (Cupertino builder wrapper)

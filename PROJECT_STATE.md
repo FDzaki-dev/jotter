@@ -1,6 +1,15 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch5] — 2026-08-23 (TERBARU)
+## [v1_Batch6] — 2026-08-23 (TERBARU)
+Progress: Kedua fix Dart di Batch5 LOLOS kompilasi (Material import + notification param, tidak muncul lagi di log). Error baru: dependency pihak ketiga usang.
+- Root cause: `flutter_timezone: ^1.0.8` resolve ke versi lama yang pakai Flutter plugin embedding v1 (`Registrar`/`messenger`) yang sudah DIHAPUS dari Flutter modern -> `flutter_timezone:compileReleaseKotlin` gagal compile.
+- Fix: `pubspec.yaml` -> `flutter_timezone: ^5.1.0` (versi resolved terkonfirmasi tersedia dari log pub get sebelumnya)
+- Konsekuensi breaking-change: dicek via web search ke dokumentasi resmi -> `FlutterTimezone.getLocalTimezone()` di versi 5.x mengembalikan objek `TimezoneInfo` (BUKAN `String` lagi seperti 1.0.8). `lib/services/notification_service.dart` disesuaikan pakai `tzInfo.identifier`.
+- 2 file diubah (pubspec.yaml + notification_service.dart), masih 1 task: "perbaiki error compile flutter_timezone dari log ini"
+- Toolchain (Gradle/AGP/Kotlin) & 2 fix Batch5 TIDAK disentuh lagi — sudah lolos
+- Belum diverifikasi compile penuh — cek run CI berikutnya
+
+## [v1_Batch5] — 2026-08-23
 Progress: Gradle/AGP/Kotlin phase kini LOLOS (cuma warning, tidak lagi blocking). Build maju sampai tahap kompilasi Dart (kernel_snapshot_program) dan gagal di 2 error compiler nyata — bukan lagi soal versi toolchain. Sumber: `0_build.txt` (CI run setelah Batch4).
 - Fix 1: `lib/app.dart` -> `Material`/`MaterialType` tidak terdefinisi karena hanya import cupertino.dart (tidak otomatis meng-export widget Material). Ditambahkan `import 'package:flutter/material.dart' show Material, MaterialType;`
 - Fix 2: `lib/services/notification_service.dart` -> `zonedSchedule` di flutter_local_notifications 17.2.4 (versi resolved CI) TERNYATA masih mewajibkan parameter `uiLocalNotificationDateInterpretation` (dugaan sebelumnya di Batch1 bahwa param ini sudah dihapus di v17 TERBUKTI SALAH). Parameter dikembalikan.

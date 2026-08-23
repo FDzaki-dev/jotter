@@ -1,6 +1,12 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch3] — 2026-08-23 (TERBARU)
+## [v1_Batch4] — 2026-08-23 (TERBARU)
+Fix: CI gagal lagi — Gradle 8.14 & AGP 8.11.1 sekarang hanya warning (bukan blocker), TAPI Kotlin 2.0.0 < minimum Flutter 2.2.20. Sumber: log `0_build.txt` (CI run setelah Batch3).
+- Diubah: `android/settings.gradle.kts` -> Kotlin 1.9.24 -> 2.2.20 (1 file, sesuai batch limit)
+- Warning aktif (belum blocking, diabaikan dulu): Gradle disarankan naik ke 9.1.0+, AGP disarankan naik ke 9.0.1+ — akan ditangani jika Flutter benar2 men-drop dukungan versi saat ini
+- Belum diverifikasi compile — cek run CI berikutnya
+
+## [v1_Batch3] — 2026-08-23
 Fix: CI gagal lagi di "Build release APK" — Gradle 8.14 sukses diterapkan, TAPI AGP 8.3.2 < minimum Flutter 8.11.1. Sumber: log `0_build.txt` (CI run setelah Batch2).
 - Diubah: `android/settings.gradle.kts` -> AGP 8.3.2 -> 8.11.1 (1 file, sesuai batch limit)
 - Gradle 8.14 TIDAK diubah lagi (sudah cukup, warning "upgrade to 9.1.0 soon" hanya deprecation notice bukan error, akan ditangani terpisah jika benar2 di-drop)

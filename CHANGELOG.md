@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch4] - 2026-08-23
+### Fixed
+- CI build failure: bump Kotlin 1.9.24 -> 2.2.20 (Flutter stable 3.47.1 requires Kotlin >= 2.2.20)
+
 ## [v1_Batch3] - 2026-08-23
 ### Fixed
 - CI build failure: bump AGP 8.3.2 -> 8.11.1 (Flutter stable 3.47.1 requires AGP >= 8.11.1)

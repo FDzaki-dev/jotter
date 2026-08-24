@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch9] - 2026-08-24
+### Fixed
+- MainActivity.kt: FlutterActivity -> FlutterFragmentActivity (local_auth's BiometricPrompt requires a FragmentActivity host; biometric toggle was a no-op without this)
+
 ## [v1_Batch8] - 2026-08-23
 ### Fixed
 - release.yml: --split-per-abi flag - stops shipping a fat APK with all CPU architectures bundled, ~3x size reduction per download

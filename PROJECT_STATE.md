@@ -1,6 +1,13 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch8] — 2026-08-23 (TERBARU)
+## [v1_Batch9] — 2026-08-24 (TERBARU)
+Fix: Biometric toggle nyala tapi authenticate() gak pernah benar2 muncul/berhasil ("kosmetik doang").
+- Root cause: `MainActivity.kt` extends `FlutterActivity` biasa. Plugin `local_auth` di Android pakai `BiometricPrompt` yang WAJIB `FragmentActivity` sebagai host — dengan `FlutterActivity` biasa, panggilan biometric gagal secara diam2 (canCheckBiometrics/authenticate return false, tidak throw), makanya toggle-nya kelihatan "jalan" tapi prompt gak pernah muncul.
+- Fix: `MainActivity.kt` -> extends `FlutterFragmentActivity` (bukan `FlutterActivity`). MethodChannel crash-logger yang sudah ada tidak terpengaruh (FlutterFragmentActivity punya override point configureFlutterEngine yang sama).
+- 1 file diubah, 1 task, root cause pasti (requirement resmi terdokumentasi local_auth), bukan tebakan
+- PIN lock TIDAK terpengaruh bug ini (PIN pakai flutter_secure_storage murni, tidak butuh FragmentActivity) — kalau PIN sudah jalan normal, ini murni soal biometric
+
+## [v1_Batch8] — 2026-08-23
 Fix: APK bengkak >50MB — bukan bug build, tapi `flutter build apk --release` default menghasilkan "fat APK" berisi native library utk SEMUA arsitektur CPU sekaligus (armeabi-v7a + arm64-v8a + x86_64 digabung jadi satu file).
 - Diubah: `.github/workflows/release.yml` -> tambah flag `--split-per-abi`, sekarang menghasilkan 3 APK terpisah per arsitektur, masing2 ~1/3 ukuran fat APK
 - Rilis GitHub sekarang akan berisi 3 file: app-arm64-v8a-release.apk (dipakai 95%+ HP modern), app-armeabi-v7a-release.apk (HP 32-bit lama), app-x86_64-release.apk (emulator)

@@ -1,6 +1,15 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch17] — 2026-08-24 (TERBARU)
+## [v1_Batch18] — 2026-08-24 (TERBARU)
+Fix: verdict P0.3 — Lock/Biometric feedback jelas (+ cross-fix audit Medium #9).
+- `lib/screens/lock_screen.dart`: `_tryBiometric()` sekarang set `_biometricAvailable` + tampilkan pesan error eksplisit "Autentikasi biometrik gagal. Masukkan PIN Anda." saat gagal (sebelumnya silent, langsung balik ke keypad tanpa penjelasan). Tambah CTA eksplisit tombol "Gunakan Biometrik" di bawah keypad (mode verify) — sebelumnya biometric HANYA auto-trigger sekali saat screen dibuka, tidak ada cara manual re-trigger kalau gagal/di-skip.
+- `lib/screens/settings_screen.dart`: toggle "Gunakan Biometrik" kini tampilkan `CupertinoAlertDialog` saat `canUseBiometrics()` false (sebelumnya `if (!available) return;` — senyap total, ini SEKALIGUS resolve audit Medium #9).
+- 2 file diubah, 1 task (micro-batch, gabung P0.3 + #9 krn root cause & lokasi sama persis).
+- AUDIT_ISSUES.md #9 & verdict P0.3 ditandai RESOLVED.
+- Belum diverifikasi run CI.
+- **Seluruh P0 (Logic P0 + UX P0) dari verdict kini RESOLVED.** Next sesuai execution order verdict: Logic P1 -> mulai dari High #7 (= verdict P1.4, editor dirty-state).
+
+## [v1_Batch17] — 2026-08-24
 Fix: AUDIT High #6 / verdict P0.2 — tab Kalender tidak reaktif (data reminder stale).
 - File: `lib/screens/calendar_screen.dart`
 - Root cause: `_load()` cuma dipanggil sekali di `initState`; `CupertinoTabView` mempertahankan state tab shg tidak rebuild otomatis saat provider berubah dari tab lain.

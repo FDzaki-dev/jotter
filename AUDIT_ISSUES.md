@@ -52,7 +52,7 @@ Metode: static review manual seluruh `lib/**/*.dart` (1665 baris), seluruh Prote
 - `lib/screens/home_screen.dart:18` (`_searchController`), `lib/screens/note_editor_screen.dart:19-21` (`_titleCtrl`, `_contentCtrl`, `_newItemCtrl`).
 - Tidak ada override `dispose()` di kedua State class ini. Memory leak terakumulasi setiap kali buka/tutup note atau rebuild search field.
 
-**9. Toggle "Gunakan Biometrik" gagal senyap tanpa pesan error**
+**9. ✅ RESOLVED (v1_Batch18) — Toggle "Gunakan Biometrik" gagal senyap tanpa pesan error**
 - File: `lib/screens/settings_screen.dart:56-62` — jika `canUseBiometrics()` `false`, switch cuma `return` tanpa dialog penjelasan ke user kenapa toggle tidak menyala.
 
 **10. Potensi crash `use-after-dispose` (minor/edge-case)**
@@ -90,7 +90,7 @@ Status keseluruhan menurut verdict: ~80-85% polished, TIDAK perlu refactor/redes
 ### P0 — WAJIB
 - **P0.1 Locked note masking (title+content)** — ✅ SUDAH RESOLVED lewat audit #1 (v1_Batch11, notif) + #5 (v1_Batch15, title Home+Kalender). Diverifikasi ulang: `filtered_notes_screen.dart` (Arsip/Sampah) reuse `NoteCard` yg sudah masking → ikut ter-cover, tidak ada celah baru.
 - **P0.2 Calendar synchronization (stale setelah create/edit/delete reminder)** — ✅ RESOLVED v1_Batch17 (= audit High #6).
-- **P0.3 Lock/Biometric feedback jelas (termasuk state/CTA lock screen)** — sebagian DUPLIKAT audit Medium #9 (toggle biometric senyap), diperluas: lock screen (`lock_screen.dart`) juga perlu state/CTA lebih jelas (belum ada entri audit sebelumnya utk lock screen CTA — item baru, gabung ke #9 saat eksekusi).
+- **P0.3 Lock/Biometric feedback jelas (termasuk state/CTA lock screen)** — ✅ RESOLVED v1_Batch18 (sekaligus resolve audit Medium #9).
 
 ### P1 — PRIORITAS (item baru, belum ada di AUDIT_ISSUES sebelumnya)
 - P1.4 Editor dirty-state (jangan save kalau tidak ada perubahan) — OVERLAP dgn audit High #7 (modifiedAt berubah tanpa edit), root cause sama (`note_editor_screen.dart` tidak ada dirty-check). Gabung jadi 1 eksekusi dgn #7.

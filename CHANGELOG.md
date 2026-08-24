@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch18] - 2026-08-24
+### Fixed
+- lock_screen.dart + settings_screen.dart: feedback jelas saat biometric gagal/tidak tersedia (dialog di Settings, error message + tombol "Gunakan Biometrik" di Lock Screen) (verdict P0.3 + AUDIT Medium #9 resolved)
+
 ## [v1_Batch17] - 2026-08-24
 ### Fixed
 - calendar_screen.dart: tab Kalender kini reaktif — otomatis refresh reminder saat ada perubahan note dari tab lain (listener ke NotesProvider) (AUDIT High #6 / verdict P0.2 resolved)

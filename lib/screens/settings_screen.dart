@@ -56,7 +56,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (v) async {
                         if (v) {
                           final available = await AuthService().canUseBiometrics();
-                          if (!available) return;
+                          if (!available) {
+                            if (mounted) {
+                              showCupertinoDialog(
+                                context: context,
+                                builder: (_) => CupertinoAlertDialog(
+                                  title: const Text('Biometrik Tidak Tersedia'),
+                                  content: const Text(
+                                      'Pastikan sidik jari atau Face Unlock sudah didaftarkan di pengaturan HP Anda, lalu coba lagi.'),
+                                  actions: [
+                                    CupertinoDialogAction(
+                                      child: const Text('OK'),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            return;
+                          }
                         }
                         settings.setBiometricEnabled(v);
                       },

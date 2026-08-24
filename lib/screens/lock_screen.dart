@@ -19,6 +19,7 @@ class _LockScreenState extends State<LockScreen> {
   String _confirmPin = '';
   bool _isConfirming = false;
   String? _error;
+  bool _biometricAvailable = false;
 
   @override
   void initState() {
@@ -31,9 +32,15 @@ class _LockScreenState extends State<LockScreen> {
   Future<void> _tryBiometric() async {
     final enabled = await _auth.isBiometricPreferenceEnabled();
     final available = await _auth.canUseBiometrics();
-    if (enabled && available) {
-      final ok = await _auth.authenticateBiometric();
-      if (ok && mounted) Navigator.of(context).pop(true);
+    if (!mounted) return;
+    setState(() => _biometricAvailable = enabled && available);
+    if (!(enabled && available)) return;
+    final ok = await _auth.authenticateBiometric();
+    if (!mounted) return;
+    if (ok) {
+      Navigator.of(context).pop(true);
+    } else {
+      setState(() => _error = 'Autentikasi biometrik gagal. Masukkan PIN Anda.');
     }
   }
 
@@ -119,6 +126,18 @@ class _LockScreenState extends State<LockScreen> {
             if (_error != null) Text(_error!, style: const TextStyle(color: CupertinoColors.systemRed)),
             const SizedBox(height: 24),
             _buildKeypad(),
+            if (widget.mode == LockMode.verify && _biometricAvailable)
+              CupertinoButton(
+                onPressed: _tryBiometric,
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(CupertinoIcons.lock_shield, size: 18),
+                    SizedBox(width: 6),
+                    Text('Gunakan Biometrik'),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

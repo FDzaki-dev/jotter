@@ -1,6 +1,24 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch19] — 2026-08-24 (TERBARU)
+## ⚠️ ATURAN PERMANEN (baca sebelum eksekusi command apapun — tidak ikut aturan descending, selalu di sini)
+- **Folder lokal / nama repo GitHub / package Android**: SELALU huruf kecil semua → `jotter` (contoh: `~/projects/jotter`, `gh repo create jotter`, `com.jotter.notes`). JANGAN PERNAH `Jotter`/`JOTTER` dsb di path/folder/repo — Termux/Linux case-sensitive, huruf kapital bikin folder BEDA & terpisah dari yang sudah ke-push ke GitHub → desync.
+- **Nama file ZIP output**: SELALU huruf besar di awal → `Jotter_v1_BatchN.zip` (ikut nama app display "Jotter"). Ini SENGAJA beda dari folder — bukan salah ketik.
+- Ringkasnya: `Jotter` (kapital) = nama file/branding. `jotter` (kecil) = path/folder/repo/package. Jangan ditukar.
+
+## [v1_Batch21] — 2026-08-24 (TERBARU)
+Dok: tanam aturan permanen soal konsistensi huruf besar/kecil path Termux vs nama file ZIP (section di atas), setelah ada laporan salah pakai kapital di sesi lain. 0 file kode diubah, 1 file dok diubah (PROJECT_STATE.md).
+
+## [v1_Batch20] — 2026-08-24
+Fix: temuan user #1 lanjutan — gesture & back button MASIH kosmetik setelah Batch19 (Batch19 hanya menyentuh AndroidManifest, ternyata bukan satu2nya root cause).
+- File: `lib/screens/note_editor_screen.dart`
+- Root cause KEDUA (diverifikasi via web search — konfirmasi bug resmi Flutter, GitHub issue `flutter/flutter#138624`): kode pakai `PopScope(canPop: false, onPopInvoked: ...)` — API `onPopInvoked` (LAMA) punya bug terkonfirmasi: **tidak pernah terpanggil sama sekali untuk gesture back saat `canPop: false`** (hanya terpanggil kalau back via TOMBOL). Persis gejala "kosmetik": swipe-back dimulai (preview animasi jalan), tapi karena `canPop:false` blokir pop-nya DAN callback gak pernah fire, `_saveAndPop()`+`Navigator.pop()` manual gak pernah kepanggil -> layar cuma snap-back diam, catatan gak ke-save gak ke-close.
+- Fix: `onPopInvoked` -> `onPopInvokedWithResult` (API resmi pengganti, dikonfirmasi dokumentasi resmi `api.flutter.dev/PopScope-class` + jadi solusi utk issue #138624 di atas).
+- 1 file diubah (1 baris signature callback), 1 task (micro-batch), root cause pasti dari dokumentasi+issue resmi, bukan tebakan.
+- Kombinasi Batch19 (AndroidManifest predictive-back off) + Batch20 (onPopInvokedWithResult) sekarang saling melengkapi: satu urus level Android OS, satu urus level Flutter Navigator/PopScope. Confidence tinggi keduanya bareng nyelesaiin masalah back gesture+button.
+- Grep ulang seluruh `lib/`: cuma 1 titik PopScope di project (note_editor_screen.dart) — tidak ada titik lain yang perlu disamakan.
+- Belum diverifikasi di device fisik — mohon konfirmasi setelah build berikutnya.
+
+## [v1_Batch19] — 2026-08-24
 🎉 **Milestone: CI CONFIRMED HIJAU pertama kali** (dikonfirmasi user via screenshot GitHub Release — 3 APK arm64-v8a/armeabi-v7a/x86_64 + source zip/tar.gz sukses ter-publish). Seluruh chain fix toolchain Batch2-9 (Gradle/AGP/Kotlin/desugaring/flutter_timezone/split-per-abi) TERBUKTI BENAR end-to-end.
 
 Fix: temuan user #1 — tombol & gesture back "kosmetik doang" (tidak berfungsi).

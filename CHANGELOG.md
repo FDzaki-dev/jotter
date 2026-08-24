@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v1_Batch21] - 2026-08-24
+### Docs
+- PROJECT_STATE.md: tambah section ATURAN PERMANEN - jotter (lowercase) untuk path/folder/repo/package, Jotter (capital) untuk nama file ZIP
+
+## [v1_Batch20] - 2026-08-24
+### Fixed
+- note_editor_screen.dart: onPopInvoked -> onPopInvokedWithResult (confirmed Flutter bug flutter/flutter#138624 - old API never fires for gesture-triggered back when canPop=false, causing swipe-back to silently do nothing)
+
 ## [v1_Batch19] - 2026-08-24
 ### Fixed
 - AndroidManifest.xml: enableOnBackInvokedCallback true→false — back button/gesture jadi non-fungsional ("kosmetik") krn konflik predictive-back Android (Material-only) dgn CupertinoPageRoute yang dipakai app ini

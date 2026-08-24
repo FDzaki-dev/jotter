@@ -45,10 +45,17 @@ class NotificationService {
     final scheduledDate = tz.TZDateTime.from(note.reminderAt!, tz.local);
     if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
 
+    final String title = note.isLocked ? 'Jotter' : (note.title.isEmpty ? 'Jotter' : note.title);
+    final String body = note.isLocked
+        ? 'Anda memiliki catatan terkunci yang perlu diperiksa'
+        : (note.type == NoteType.checklist
+            ? 'Anda memiliki checklist yang perlu diselesaikan'
+            : note.content);
+
     await _plugin.zonedSchedule(
       note.id.hashCode,
-      note.title.isEmpty ? 'Jotter' : note.title,
-      note.type == NoteType.checklist ? 'Anda memiliki checklist yang perlu diselesaikan' : note.content,
+      title,
+      body,
       scheduledDate,
       const NotificationDetails(
         android: AndroidNotificationDetails(

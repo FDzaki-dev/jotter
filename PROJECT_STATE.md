@@ -1,6 +1,15 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch10] — 2026-08-24 (TERBARU)
+## [v1_Batch11] — 2026-08-24 (TERBARU)
+Fix: AUDIT Critical #1 — reminder notifikasi membocorkan isi note terkunci.
+- File: `lib/services/notification_service.dart` (`scheduleReminder()`)
+- Root cause: title/body notifikasi diisi `note.title`/`note.content` mentah tanpa cek `note.isLocked`.
+- Fix: jika `note.isLocked == true` -> title dipaksa "Jotter", body dipaksa generik "Anda memiliki catatan terkunci yang perlu diperiksa" (note checklist tetap pakai body generik lama, tidak berubah).
+- 1 file kode diubah, 1 task (micro-batch). AUDIT_ISSUES.md #1 ditandai RESOLVED.
+- Belum diverifikasi run CI.
+- Sisa Pending Queue: Critical #2 (reminder tak dibatalkan saat note dihapus), #3 (no reschedule setelah reboot), #4 (hashCode ID out-of-range) + 3 High + 3 Medium + 2 Low — lihat AUDIT_ISSUES.md.
+
+## [v1_Batch10] — 2026-08-24
 Dok: Audit inspeksi mendalam seluruh kode (lib/**, protected assets, CI workflow) → `AUDIT_ISSUES.md` (baru).
 - 12 cacat tercatat: 4 Critical (reminder bocor isi note terkunci lewat notifikasi; reminder tidak dibatalkan saat note dihapus; reminder hilang stlh reboot HP - no reschedule; notif ID dari `.hashCode` berisiko out-of-range), 3 High, 3 Medium, 2 Low/dok.
 - BELUM ADA FIX kode diterapkan batch ini — murni dokumentasi (sesuai instruksi user: "dokumentasi dulu"). Semua 12 item jadi Pending Queue, diprioritaskan mulai dari Critical di batch berikutnya (micro-batching: 1 task/batch).

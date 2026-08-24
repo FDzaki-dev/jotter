@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch11] - 2026-08-24
+### Fixed
+- notification_service.dart: scheduleReminder() no longer leaks locked note title/content into notification tray (AUDIT Critical #1 resolved)
+
 ## [v1_Batch10] - 2026-08-24
 ### Added
 - AUDIT_ISSUES.md: audit inspeksi mendalam, 12 cacat tercatat (4 Critical, 3 High, 3 Medium, 2 Low). Belum ada fix kode - dokumentasi murni.

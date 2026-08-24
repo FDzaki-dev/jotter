@@ -7,7 +7,7 @@ Metode: static review manual seluruh `lib/**/*.dart` (1665 baris), seluruh Prote
 
 ### 🔴 CRITICAL
 
-**1. Reminder notifikasi membocorkan isi note yang dikunci (PIN/biometric bypass via notifikasi)**
+**1. ✅ RESOLVED (v1_Batch11) — Reminder notifikasi membocorkan isi note yang dikunci (PIN/biometric bypass via notifikasi)**
 - File: `lib/services/notification_service.dart:48-63`
 - `scheduleReminder()` mengisi title notifikasi = `note.title` dan body = `note.content` (utk note teks) TANPA cek `note.isLocked`. Note terkunci tetap kirim notifikasi berisi judul+isi asli ke tray/lockscreen HP.
 - Note checklist sedikit lebih aman (body generik "Anda memiliki checklist..."), tapi title tetap bocor.

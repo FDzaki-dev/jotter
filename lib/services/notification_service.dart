@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tzdata;
@@ -53,7 +55,7 @@ class NotificationService {
             : note.content);
 
     await _plugin.zonedSchedule(
-      note.id.hashCode,
+      _stableNotificationId(note.id),
       title,
       body,
       scheduledDate,
@@ -71,6 +73,21 @@ class NotificationService {
   }
 
   Future<void> cancelReminder(String noteId) async {
-    await _plugin.cancel(noteId.hashCode);
+    await _plugin.cancel(_stableNotificationId(noteId));
+  }
+
+  /// FNV-1a 32-bit hash, dijalankan manual di atas byte UTF-8 `id`.
+  /// Dijamin selalu positif & muat di 32-bit int Android (`NotificationManager`
+  /// butuh Java int) — TIDAK bergantung pada `String.hashCode` bawaan Dart,
+  /// yang implementasinya bisa berbeda antar versi/platform Dart VM (AOT arm64
+  /// pakai int 64-bit) dan tidak dijamin muat di 32-bit.
+  int _stableNotificationId(String id) {
+    const int fnvPrime = 0x01000193;
+    int hash = 0x811c9dc5;
+    for (final byte in utf8.encode(id)) {
+      hash ^= byte;
+      hash = (hash * fnvPrime) & 0xFFFFFFFF;
+    }
+    return hash & 0x7FFFFFFF;
   }
 }

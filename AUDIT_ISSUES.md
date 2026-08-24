@@ -23,7 +23,7 @@ Metode: static review manual seluruh `lib/**/*.dart` (1665 baris), seluruh Prote
 - Cek: tidak ada `RECEIVE_BOOT_COMPLETED` di `AndroidManifest.xml`, tidak ada BroadcastReceiver, dan `getNotesWithReminders()` (`note_repository.dart:45`) hanya dipakai `calendar_screen.dart:29` untuk tampilan kalender — bukan untuk re-arm alarm saat start.
 - `flutter_local_notifications` pakai AlarmManager yang di-clear OS setiap reboot. Tanpa reschedule saat app start, semua reminder yang sudah dijadwalkan otomatis hangus tiap kali HP restart, tanpa pemberitahuan ke user.
 
-**4. Notification ID dari `note.id.hashCode` berisiko out-of-range**
+**4. ✅ RESOLVED (v1_Batch14) — Notification ID dari `note.id.hashCode` berisiko out-of-range**
 - File: `lib/services/notification_service.dart:49,67`
 - `String.hashCode` Dart (VM/AOT, umumnya 64-bit APK arm64) tidak dijamin muat di 32-bit int Android (`NotificationManager` butuh Java `int`). Ini anti-pattern yang sudah dikenal luas di ekosistem flutter_local_notifications. Berisiko exception/ID tidak konsisten pada sebagian device — perlu diverifikasi dengan test nyata di CI/device.
 

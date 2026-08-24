@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch14] - 2026-08-24
+### Fixed
+- notification_service.dart: notification ID pakai hash FNV-1a 32-bit manual (bukan String.hashCode bawaan Dart) — jamin selalu muat int32 Android (AUDIT Critical #4 resolved, seluruh 4 Critical kini RESOLVED)
+
 ## [v1_Batch13] - 2026-08-24
 ### Fixed
 - notes_provider.dart + app.dart: reminder di-reschedule ulang tiap app dibuka (mitigasi hilangnya alarm setelah reboot HP; AUDIT Critical #3 resolved via reschedule-on-open)

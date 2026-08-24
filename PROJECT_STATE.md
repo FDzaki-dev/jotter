@@ -1,6 +1,15 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch13] — 2026-08-24 (TERBARU)
+## [v1_Batch14] — 2026-08-24 (TERBARU)
+Fix: AUDIT Critical #4 — notification ID dari `note.id.hashCode` berisiko out-of-range.
+- File: `lib/services/notification_service.dart`
+- Root cause: `String.hashCode` bawaan Dart implementation-defined, tidak dijamin muat 32-bit int Android.
+- Fix: tambah `_stableNotificationId()` — hash FNV-1a 32-bit manual di atas byte UTF-8 id, di-mask `& 0x7FFFFFFF` -> selalu positif & muat int32. Dipakai konsisten di `scheduleReminder()` DAN `cancelReminder()` (wajib sama, krn cancel harus match ID yg dipakai saat schedule).
+- 1 file diubah, 1 task (micro-batch). AUDIT_ISSUES.md #4 ditandai RESOLVED.
+- Belum diverifikasi run CI.
+- **Seluruh 4 Critical dari audit Batch10 kini RESOLVED.** Sisa Pending Queue: 3 High + 3 Medium + 2 Low — lihat AUDIT_ISSUES.md, mulai dari High berikutnya.
+
+## [v1_Batch13] — 2026-08-24
 Fix: AUDIT Critical #3 — reminder hilang setelah restart HP (no reschedule).
 - `lib/providers/notes_provider.dart`: tambah method `rescheduleAllReminders()` — ambil semua note ber-reminder dari repo, panggil `scheduleReminder()` ulang utk masing2.
 - `lib/app.dart` (`_AppEntryState._init()`): panggil `rescheduleAllReminders()` sesaat setelah `NotificationService().init()`, tiap kali app dibuka.

@@ -1,6 +1,16 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch16] — 2026-08-24 (TERBARU)
+## [v1_Batch17] — 2026-08-24 (TERBARU)
+Fix: AUDIT High #6 / verdict P0.2 — tab Kalender tidak reaktif (data reminder stale).
+- File: `lib/screens/calendar_screen.dart`
+- Root cause: `_load()` cuma dipanggil sekali di `initState`; `CupertinoTabView` mempertahankan state tab shg tidak rebuild otomatis saat provider berubah dari tab lain.
+- Fix: `_CalendarScreenState` register `_provider.addListener(_load)` di `initState`, unregister di `dispose()` (baru ditambah, sebelumnya tidak ada). Setiap `NotesProvider.notifyListeners()` (save/archive/trash/restore/permanent-delete/lock) otomatis refetch reminder Kalender.
+- Tidak mengubah arsitektur Provider/nav (sesuai batasan verdict UX) — cuma tambah listener di consumer.
+- 1 file diubah, 1 task (micro-batch). AUDIT_ISSUES.md #6 & verdict P0.2 ditandai RESOLVED.
+- Belum diverifikasi run CI.
+- Sisa Pending Queue: High #7 (= verdict P1.4, dirty-state editor) + verdict P0.3 (biometric/lock feedback) → next-up sesuai urutan Logic P0 → UX P0. Lalu 3 Medium + 2 Low + P1.5-9 + P2.10-13.
+
+## [v1_Batch16] — 2026-08-24
 Dok: Tanam+adaptasi verdict eksternal `Jotter_v1_Batch14_UX_UI_POLISH.md` ke `AUDIT_ISSUES.md` (section baru "UX/UI POLISH BACKLOG"). Murni dokumentasi, 0 file kode diubah.
 - Verdict: proyek ~80-85% polished, surgical micro-fix only (DILARANG refactor/redesign/ganti arsitektur/DB/tab).
 - P0.1 (locked note masking) sudah RESOLVED (cross-ref audit #1 & #5). P0.2 (Calendar sync) = duplikat audit High #6. P0.3 (biometric/lock feedback) overlap audit Medium #9 + tambahan lock-screen CTA.

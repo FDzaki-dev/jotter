@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch17] - 2026-08-24
+### Fixed
+- calendar_screen.dart: tab Kalender kini reaktif — otomatis refresh reminder saat ada perubahan note dari tab lain (listener ke NotesProvider) (AUDIT High #6 / verdict P0.2 resolved)
+
 ## [v1_Batch16] - 2026-08-24
 ### Added
 - AUDIT_ISSUES.md: tanam verdict eksternal UX/UI Polish (P0/P1/P2), cross-ref ke item audit existing, sisanya jadi Pending Queue baru. Dokumentasi murni.

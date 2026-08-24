@@ -18,15 +18,26 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   List<Note> _allReminders = [];
+  late final NotesProvider _provider;
 
   @override
   void initState() {
     super.initState();
+    _provider = context.read<NotesProvider>();
+    // Reaktif: refetch reminder setiap kali NotesProvider berubah (save/archive/
+    // trash/restore/permanent-delete/lock), bukan cuma sekali saat tab dibuka.
+    _provider.addListener(_load);
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
+  @override
+  void dispose() {
+    _provider.removeListener(_load);
+    super.dispose();
+  }
+
   Future<void> _load() async {
-    final notes = await context.read<NotesProvider>().loadNotesWithReminders();
+    final notes = await _provider.loadNotesWithReminders();
     if (mounted) setState(() => _allReminders = notes);
   }
 

@@ -1,6 +1,12 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch9] — 2026-08-24 (TERBARU)
+## [v1_Batch10] — 2026-08-24 (TERBARU)
+Dok: Audit inspeksi mendalam seluruh kode (lib/**, protected assets, CI workflow) → `AUDIT_ISSUES.md` (baru).
+- 12 cacat tercatat: 4 Critical (reminder bocor isi note terkunci lewat notifikasi; reminder tidak dibatalkan saat note dihapus; reminder hilang stlh reboot HP - no reschedule; notif ID dari `.hashCode` berisiko out-of-range), 3 High, 3 Medium, 2 Low/dok.
+- BELUM ADA FIX kode diterapkan batch ini — murni dokumentasi (sesuai instruksi user: "dokumentasi dulu"). Semua 12 item jadi Pending Queue, diprioritaskan mulai dari Critical di batch berikutnya (micro-batching: 1 task/batch).
+- 1 file baru (AUDIT_ISSUES.md), 0 file kode diubah
+
+## [v1_Batch9] — 2026-08-24
 Fix: Biometric toggle nyala tapi authenticate() gak pernah benar2 muncul/berhasil ("kosmetik doang").
 - Root cause: `MainActivity.kt` extends `FlutterActivity` biasa. Plugin `local_auth` di Android pakai `BiometricPrompt` yang WAJIB `FragmentActivity` sebagai host — dengan `FlutterActivity` biasa, panggilan biometric gagal secara diam2 (canCheckBiometrics/authenticate return false, tidak throw), makanya toggle-nya kelihatan "jalan" tapi prompt gak pernah muncul.
 - Fix: `MainActivity.kt` -> extends `FlutterFragmentActivity` (bukan `FlutterActivity`). MethodChannel crash-logger yang sudah ada tidak terpengaruh (FlutterFragmentActivity punya override point configureFlutterEngine yang sama).
@@ -76,6 +82,7 @@ Status: Initial build lengkap. BELUM di-compile lokal (sandbox tanpa Flutter SDK
 AndroidManifest.xml · android/build.gradle.kts · android/app/build.gradle.kts · settings.gradle.kts · MainActivity.kt · MainApplication.kt · DB schema (database_helper.dart) · android/release.keystore · .gitignore · .gitattributes · .github/workflows/release.yml
 
 ### Known limitations / Pending Queue (batch berikutnya)
+- **→ Lihat `AUDIT_ISSUES.md` untuk 12 cacat hasil audit Batch10 (4 Critical/3 High/3 Medium/2 Low), belum ada yang di-fix.**
 - Font: pakai system default (Roboto), BUKAN SF Pro — lisensi Apple tidak mengizinkan redistribusi di Android. Alternatif: font "Inter" (open-license, mirip SF Pro).
 - Ikon launcher: placeholder vector sederhana (bentuk notepad), belum artwork final.
 - Konten catatan terkunci: saat ini digerbang PIN/biometric di level UI, BELUM dienkripsi AES at-rest.

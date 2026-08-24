@@ -1,6 +1,7 @@
 .gitattributes
 .github/workflows/release.yml
 .gitignore
+AUDIT_ISSUES.md
 CHANGELOG.md
 FILE_MANIFEST.txt
 PROJECT_STATE.md

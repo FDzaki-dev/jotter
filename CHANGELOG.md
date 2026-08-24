@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch10] - 2026-08-24
+### Added
+- AUDIT_ISSUES.md: audit inspeksi mendalam, 12 cacat tercatat (4 Critical, 3 High, 3 Medium, 2 Low). Belum ada fix kode - dokumentasi murni.
+
 ## [v1_Batch9] - 2026-08-24
 ### Fixed
 - MainActivity.kt: FlutterActivity -> FlutterFragmentActivity (local_auth's BiometricPrompt requires a FragmentActivity host; biometric toggle was a no-op without this)

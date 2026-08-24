@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch12] - 2026-08-24
+### Fixed
+- notes_provider.dart + note_repository.dart: reminder alarm dibatalkan saat note di-trash / permanent-delete / trash dikosongkan (AUDIT Critical #2 resolved)
+
 ## [v1_Batch11] - 2026-08-24
 ### Fixed
 - notification_service.dart: scheduleReminder() no longer leaks locked note title/content into notification tray (AUDIT Critical #1 resolved)

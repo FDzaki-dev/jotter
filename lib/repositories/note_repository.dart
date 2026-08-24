@@ -1,5 +1,6 @@
 import '../db/database_helper.dart';
 import '../models/note.dart';
+import '../services/notification_service.dart';
 
 enum SortMode { modified, created, alphabetical, color }
 
@@ -83,6 +84,10 @@ class NoteRepository {
 
   Future<void> emptyTrash() async {
     final db = await _dbHelper.database;
+    final trashed = await db.query('notes', columns: ['id'], where: 'isDeleted = 1');
+    for (final row in trashed) {
+      await NotificationService().cancelReminder(row['id'] as String);
+    }
     await db.delete('notes', where: 'isDeleted = 1');
   }
 }

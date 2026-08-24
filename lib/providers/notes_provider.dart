@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/note.dart';
 import '../repositories/note_repository.dart';
+import '../services/notification_service.dart';
 
 enum ViewMode { list, grid }
 
@@ -61,6 +62,7 @@ class NotesProvider extends ChangeNotifier {
   }
 
   Future<void> trashNote(String id) async {
+    await NotificationService().cancelReminder(id);
     await _repo.setDeleted(id, true);
     await loadActive();
   }
@@ -71,6 +73,7 @@ class NotesProvider extends ChangeNotifier {
   }
 
   Future<void> permanentDelete(String id) async {
+    await NotificationService().cancelReminder(id);
     await _repo.permanentDelete(id);
     await loadActive();
   }

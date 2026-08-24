@@ -13,7 +13,7 @@ Metode: static review manual seluruh `lib/**/*.dart` (1665 baris), seluruh Prote
 - Note checklist sedikit lebih aman (body generik "Anda memiliki checklist..."), tapi title tetap bocor.
 - Dampak: fitur kunci PIN/biometrik jebol total lewat notifikasi untuk note teks yang dikunci + reminder aktif.
 
-**2. Reminder tidak dibatalkan saat note dihapus**
+**2. ✅ RESOLVED (v1_Batch12) — Reminder tidak dibatalkan saat note dihapus**
 - File: `lib/providers/notes_provider.dart` (`trashNote`, `permanentDelete`) + `lib/repositories/note_repository.dart:84` (`emptyTrash`)
 - Tidak ada satupun pemanggilan `NotificationService().cancelReminder()` di path hapus/sampah/empty-trash. Hanya dipanggil dari `note_editor_screen.dart:40-42` saat note disimpan.
 - Dampak: note yang sudah dihapus/permanent-delete masih bisa memicu notifikasi reminder "hantu".

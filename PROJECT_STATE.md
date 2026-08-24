@@ -1,6 +1,15 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch11] — 2026-08-24 (TERBARU)
+## [v1_Batch12] — 2026-08-24 (TERBARU)
+Fix: AUDIT Critical #2 — reminder tidak dibatalkan saat note dihapus.
+- `lib/providers/notes_provider.dart`: `trashNote()` & `permanentDelete()` kini panggil `NotificationService().cancelReminder(id)` sebelum operasi DB.
+- `lib/repositories/note_repository.dart`: `emptyTrash()` kini query dulu semua id note terhapus, cancel reminder masing2, baru delete massal.
+- 2 file diubah, 1 task (micro-batch). AUDIT_ISSUES.md #2 ditandai RESOLVED.
+- Catatan: `emptyTrash()` belum di-wire ke UI (tombol "Kosongkan Sampah" belum ada di `filtered_notes_screen.dart`) — di luar scope task ini, tetap dicatat di Pending Queue kalau user mau ditambahkan.
+- Belum diverifikasi run CI.
+- Sisa Pending Queue: Critical #3 (no reschedule setelah reboot), #4 (hashCode ID out-of-range) + 3 High + 3 Medium + 2 Low — lihat AUDIT_ISSUES.md.
+
+## [v1_Batch11] — 2026-08-24
 Fix: AUDIT Critical #1 — reminder notifikasi membocorkan isi note terkunci.
 - File: `lib/services/notification_service.dart` (`scheduleReminder()`)
 - Root cause: title/body notifikasi diisi `note.title`/`note.content` mentah tanpa cek `note.isLocked`.

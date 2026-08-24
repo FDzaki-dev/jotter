@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch13] - 2026-08-24
+### Fixed
+- notes_provider.dart + app.dart: reminder di-reschedule ulang tiap app dibuka (mitigasi hilangnya alarm setelah reboot HP; AUDIT Critical #3 resolved via reschedule-on-open)
+
 ## [v1_Batch12] - 2026-08-24
 ### Fixed
 - notes_provider.dart + note_repository.dart: reminder alarm dibatalkan saat note di-trash / permanent-delete / trash dikosongkan (AUDIT Critical #2 resolved)

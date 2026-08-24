@@ -1,6 +1,15 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch12] — 2026-08-24 (TERBARU)
+## [v1_Batch13] — 2026-08-24 (TERBARU)
+Fix: AUDIT Critical #3 — reminder hilang setelah restart HP (no reschedule).
+- `lib/providers/notes_provider.dart`: tambah method `rescheduleAllReminders()` — ambil semua note ber-reminder dari repo, panggil `scheduleReminder()` ulang utk masing2.
+- `lib/app.dart` (`_AppEntryState._init()`): panggil `rescheduleAllReminders()` sesaat setelah `NotificationService().init()`, tiap kali app dibuka.
+- 2 file diubah, 1 task (micro-batch). AUDIT_ISSUES.md #3 ditandai RESOLVED (dengan catatan residual di bawah).
+- **Batasan yang tersisa (disengaja, bukan bug)**: reminder di-re-arm saat APP DIBUKA, BUKAN instan saat boot HP. Fix native penuh (RECEIVE_BOOT_COMPLETED + BroadcastReceiver Kotlin + headless Dart execution/android_alarm_manager_plus) butuh perubahan protected assets (AndroidManifest.xml) + dependency baru + native receiver file — di luar scope 1 task micro-batch ini. Jika reminder presisi-tanpa-buka-app dibutuhkan, ajukan sbg task terpisah.
+- Belum diverifikasi run CI.
+- Sisa Pending Queue: Critical #4 (hashCode ID out-of-range) + 3 High + 3 Medium + 2 Low — lihat AUDIT_ISSUES.md.
+
+## [v1_Batch12] — 2026-08-24
 Fix: AUDIT Critical #2 — reminder tidak dibatalkan saat note dihapus.
 - `lib/providers/notes_provider.dart`: `trashNote()` & `permanentDelete()` kini panggil `NotificationService().cancelReminder(id)` sebelum operasi DB.
 - `lib/repositories/note_repository.dart`: `emptyTrash()` kini query dulu semua id note terhapus, cancel reminder masing2, baru delete massal.

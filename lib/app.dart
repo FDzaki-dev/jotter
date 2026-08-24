@@ -49,6 +49,9 @@ class _AppEntryState extends State<_AppEntry> {
 
   Future<void> _init() async {
     await NotificationService().init();
+    if (mounted) {
+      await context.read<NotesProvider>().rescheduleAllReminders();
+    }
     _hasPin = await AuthService().hasPinSet();
     if (mounted) setState(() => _loading = false);
     if (_hasPin) {

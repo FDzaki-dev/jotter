@@ -18,7 +18,8 @@ Metode: static review manual seluruh `lib/**/*.dart` (1665 baris), seluruh Prote
 - Tidak ada satupun pemanggilan `NotificationService().cancelReminder()` di path hapus/sampah/empty-trash. Hanya dipanggil dari `note_editor_screen.dart:40-42` saat note disimpan.
 - Dampak: note yang sudah dihapus/permanent-delete masih bisa memicu notifikasi reminder "hantu".
 
-**3. Reminder hilang permanen setelah restart HP (tidak ada reschedule)**
+**3. ✅ RESOLVED* (v1_Batch13) — Reminder hilang permanen setelah restart HP (tidak ada reschedule)**
+*_Resolved via reschedule-on-app-open (bukan instant-on-boot native receiver — lihat catatan residual di PROJECT_STATE v1_Batch13)._
 - Cek: tidak ada `RECEIVE_BOOT_COMPLETED` di `AndroidManifest.xml`, tidak ada BroadcastReceiver, dan `getNotesWithReminders()` (`note_repository.dart:45`) hanya dipakai `calendar_screen.dart:29` untuk tampilan kalender — bukan untuk re-arm alarm saat start.
 - `flutter_local_notifications` pakai AlarmManager yang di-clear OS setiap reboot. Tanpa reschedule saat app start, semua reminder yang sudah dijadwalkan otomatis hangus tiap kali HP restart, tanpa pemberitahuan ke user.
 

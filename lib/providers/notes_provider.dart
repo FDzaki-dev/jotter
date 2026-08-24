@@ -26,6 +26,13 @@ class NotesProvider extends ChangeNotifier {
 
   Future<List<Note>> loadNotesWithReminders() => _repo.getNotesWithReminders();
 
+  Future<void> rescheduleAllReminders() async {
+    final withReminders = await _repo.getNotesWithReminders();
+    for (final n in withReminders) {
+      await NotificationService().scheduleReminder(n);
+    }
+  }
+
   void setSortMode(SortMode mode) {
     sortMode = mode;
     loadActive();

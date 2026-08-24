@@ -60,7 +60,7 @@ class NoteCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             if (note.title.isNotEmpty)
-              Text(note.title,
+              Text(note.isLocked ? 'Catatan Terkunci' : note.title,
                   maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
             const SizedBox(height: 4),
             if (note.isLocked)

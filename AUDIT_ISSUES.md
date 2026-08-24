@@ -31,7 +31,7 @@ Metode: static review manual seluruh `lib/**/*.dart` (1665 baris), seluruh Prote
 
 ### 🟠 HIGH
 
-**5. Judul note terkunci TIDAK tersamarkan (hanya isi yang disamarkan)**
+**5. ✅ RESOLVED (v1_Batch15) — Judul note terkunci TIDAK tersamarkan (hanya isi yang disamarkan)**
 - File: `lib/widgets/note_card.dart:62-67` — body diganti "•••••••" saat `isLocked`, tapi `note.title` tetap dirender polos di baris 62-64 tanpa syarat.
 - Sama di `lib/screens/calendar_screen.dart:91` (`title: Text(n.title...)`) — daftar reminder kalender juga menampilkan judul note terkunci tanpa masking.
 - Dampak: judul note terkunci (yang seringkali berisi info sensitif) terlihat bebas di grid/list Home dan tab Kalender tanpa perlu buka kunci sama sekali.

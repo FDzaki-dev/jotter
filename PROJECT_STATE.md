@@ -1,6 +1,14 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch14] — 2026-08-24 (TERBARU)
+## [v1_Batch15] — 2026-08-24 (TERBARU)
+Fix: AUDIT High #5 — judul note terkunci tidak tersamarkan (hanya isi yg disamarkan).
+- `lib/widgets/note_card.dart`: title diganti "Catatan Terkunci" saat `note.isLocked` (Home grid/list).
+- `lib/screens/calendar_screen.dart`: title item reminder di tab Kalender diganti "Catatan Terkunci" saat `isLocked`.
+- 2 file diubah, 1 task (micro-batch). AUDIT_ISSUES.md #5 ditandai RESOLVED.
+- Belum diverifikasi run CI.
+- Sisa Pending Queue: High #6 (tab Kalender tidak reaktif) & #7 (modifiedAt berubah tanpa edit) + 3 Medium + 2 Low — lihat AUDIT_ISSUES.md.
+
+## [v1_Batch14] — 2026-08-24
 Fix: AUDIT Critical #4 — notification ID dari `note.id.hashCode` berisiko out-of-range.
 - File: `lib/services/notification_service.dart`
 - Root cause: `String.hashCode` bawaan Dart implementation-defined, tidak dijamin muat 32-bit int Android.

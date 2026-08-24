@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch15] - 2026-08-24
+### Fixed
+- note_card.dart + calendar_screen.dart: judul note terkunci kini ikut disamarkan jadi "Catatan Terkunci" (sebelumnya cuma isi yg disamarkan, judul polos) (AUDIT High #5 resolved)
+
 ## [v1_Batch14] - 2026-08-24
 ### Fixed
 - notification_service.dart: notification ID pakai hash FNV-1a 32-bit manual (bukan String.hashCode bawaan Dart) — jamin selalu muat int32 Android (AUDIT Critical #4 resolved, seluruh 4 Critical kini RESOLVED)

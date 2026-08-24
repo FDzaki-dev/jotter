@@ -88,7 +88,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         return CupertinoListTile(
                           leading: Container(
                               width: 12, height: 12, decoration: BoxDecoration(color: noteColorFor(n.colorIndex), shape: BoxShape.circle)),
-                          title: Text(n.title.isEmpty ? '(Tanpa judul)' : n.title),
+                          title: Text(n.isLocked ? 'Catatan Terkunci' : (n.title.isEmpty ? '(Tanpa judul)' : n.title)),
                           subtitle: Text(
                               '${n.reminderAt!.hour.toString().padLeft(2, '0')}:${n.reminderAt!.minute.toString().padLeft(2, '0')}'),
                           onTap: () => _openNote(n),

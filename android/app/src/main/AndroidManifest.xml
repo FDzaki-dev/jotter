@@ -9,7 +9,7 @@
         android:name=".MainApplication"
         android:label="Jotter"
         android:icon="@mipmap/ic_launcher"
-        android:enableOnBackInvokedCallback="true"
+        android:enableOnBackInvokedCallback="false"
         android:allowBackup="false"
         android:fullBackupContent="false">
         <activity

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v1_Batch19] - 2026-08-24
+### Fixed
+- AndroidManifest.xml: enableOnBackInvokedCallback true→false — back button/gesture jadi non-fungsional ("kosmetik") krn konflik predictive-back Android (Material-only) dgn CupertinoPageRoute yang dipakai app ini
+### Milestone
+- CI confirmed GREEN pertama kali (3 APK + source archives berhasil publish ke GitHub Release)
+### Queued
+- Penamaan APK unik per rilis (Jotter-<arsitektur>-<version>-<run_number>.apk) — next batch
+
 ## [v1_Batch18] - 2026-08-24
 ### Fixed
 - lock_screen.dart + settings_screen.dart: feedback jelas saat biometric gagal/tidak tersedia (dialog di Settings, error message + tombol "Gunakan Biometrik" di Lock Screen) (verdict P0.3 + AUDIT Medium #9 resolved)

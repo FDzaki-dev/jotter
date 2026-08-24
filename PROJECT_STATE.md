@@ -1,6 +1,21 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch18] — 2026-08-24 (TERBARU)
+## [v1_Batch19] — 2026-08-24 (TERBARU)
+🎉 **Milestone: CI CONFIRMED HIJAU pertama kali** (dikonfirmasi user via screenshot GitHub Release — 3 APK arm64-v8a/armeabi-v7a/x86_64 + source zip/tar.gz sukses ter-publish). Seluruh chain fix toolchain Batch2-9 (Gradle/AGP/Kotlin/desugaring/flutter_timezone/split-per-abi) TERBUKTI BENAR end-to-end.
+
+Fix: temuan user #1 — tombol & gesture back "kosmetik doang" (tidak berfungsi).
+- File: `android/app/src/main/AndroidManifest.xml`
+- Root cause (diverifikasi web search, dok resmi Flutter per 2026-08-01): app pakai `CupertinoApp`/`CupertinoPageRoute` di seluruh alur (bukan Material). Predictive-back gesture Android (`enableOnBackInvokedCallback=true`) dibangun utk terintegrasi dgn `PredictiveBackPageTransitionsBuilder` yang MATERIAL-ONLY. Cupertino punya swipe-back gesture sendiri yg tidak terintegrasi dgn callback predictive-back native — hasilnya: OS menampilkan animasi preview back (kelihatan "jalan") tapi Flutter Navigator/PopScope tidak pernah benar2 dipanggil utk commit pop-nya (persis gejala "kosmetik doang").
+- Fix: `enableOnBackInvokedCallback` -> `"false"` (eksplisit, bukan dihapus, agar jelas ini keputusan sengaja bukan default kebetulan). Ini mengembalikan back handling ke `OnBackPressedDispatcher` klasik yg didukung penuh oleh PopScope Flutter apa pun style route-nya (Cupertino maupun Material).
+- 1 file diubah (protected asset, edit parsial 1 baris), 1 task (micro-batch).
+- Confidence tinggi (root cause match dgn dokumentasi resmi + pola bug yg dikenal luas utk kombinasi Cupertino+predictive-back), TAPI belum diverifikasi langsung di device fisik — mohon konfirmasi setelah build berikutnya apakah back button+gesture (swipe Cupertino bawaan, animasi lebih simpel dr predictive-back) sudah normal.
+- Tidak menyentuh PopScope/onPopInvoked di `note_editor_screen.dart` (logic-nya sudah benar sesuai pola resmi Flutter, cuma pakai API `onPopInvoked` yg deprecated tapi masih berfungsi — migrasi ke `onPopInvokedWithResult` bisa jadi item polish terpisah kalau perlu, non-blocking).
+
+### Pending Queue (batch berikutnya)
+- **Temuan user #2**: identitas nama file .apk harus unik tiap rilis, format wajib `Jotter-<arsitektur>-<version>-<run_number>.apk` (saat ini masih default Gradle: `app-<abi>-release.apk`, sama persis tiap rilis → gampang overwrite/rancu histori). Perlu ubah `.github/workflows/release.yml` (rename step setelah build, pakai `${{ github.run_number }}` + versi dari `pubspec.yaml`).
+- Sisa dari batch sebelumnya: High #7 (= verdict P1.4, editor dirty-state) + verdict P1.5-9 + P2.10-13 + Low #11/#12 — lihat AUDIT_ISSUES.md.
+
+## [v1_Batch18] — 2026-08-24
 Fix: verdict P0.3 — Lock/Biometric feedback jelas (+ cross-fix audit Medium #9).
 - `lib/screens/lock_screen.dart`: `_tryBiometric()` sekarang set `_biometricAvailable` + tampilkan pesan error eksplisit "Autentikasi biometrik gagal. Masukkan PIN Anda." saat gagal (sebelumnya silent, langsung balik ke keypad tanpa penjelasan). Tambah CTA eksplisit tombol "Gunakan Biometrik" di bawah keypad (mode verify) — sebelumnya biometric HANYA auto-trigger sekali saat screen dibuka, tidak ada cara manual re-trigger kalau gagal/di-skip.
 - `lib/screens/settings_screen.dart`: toggle "Gunakan Biometrik" kini tampilkan `CupertinoAlertDialog` saat `canUseBiometrics()` false (sebelumnya `if (!available) return;` — senyap total, ini SEKALIGUS resolve audit Medium #9).

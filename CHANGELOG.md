@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch8] - 2026-08-23
+### Fixed
+- release.yml: --split-per-abi flag - stops shipping a fat APK with all CPU architectures bundled, ~3x size reduction per download
+
 ## [v1_Batch7] - 2026-08-23
 ### Fixed
 - android/app/build.gradle.kts: enable core library desugaring + add desugar_jdk_libs dependency (required by flutter_local_notifications)

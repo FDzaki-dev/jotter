@@ -45,7 +45,7 @@ jobs:
           PROPS
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --split-per-abi
 
       - name: Stale run guard
         run: |
@@ -66,5 +66,5 @@ jobs:
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
           name: "Jotter ${{ steps.ver.outputs.tag }}"
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: build/app/outputs/flutter-apk/app-*-release.apk
           make_latest: true

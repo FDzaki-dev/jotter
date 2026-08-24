@@ -1,6 +1,15 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch7] — 2026-08-23 (TERBARU)
+## [v1_Batch8] — 2026-08-23 (TERBARU)
+Fix: APK bengkak >50MB — bukan bug build, tapi `flutter build apk --release` default menghasilkan "fat APK" berisi native library utk SEMUA arsitektur CPU sekaligus (armeabi-v7a + arm64-v8a + x86_64 digabung jadi satu file).
+- Diubah: `.github/workflows/release.yml` -> tambah flag `--split-per-abi`, sekarang menghasilkan 3 APK terpisah per arsitektur, masing2 ~1/3 ukuran fat APK
+- Rilis GitHub sekarang akan berisi 3 file: app-arm64-v8a-release.apk (dipakai 95%+ HP modern), app-armeabi-v7a-release.apk (HP 32-bit lama), app-x86_64-release.apk (emulator)
+- Rekomendasi: install app-arm64-v8a-release.apk kecuali yakin HP masih 32-bit
+- Minify+shrinkResources sudah aktif dari awal (tidak berubah) — kontributor size utama memang fat-APK, bukan itu
+- 1 file diubah, 1 task
+- Belum diverifikasi run CI (perbaikan kompilasi & desugaring dari Batch7 juga masih menunggu konfirmasi hijau)
+
+## [v1_Batch7] — 2026-08-23
 Progress: flutter_timezone compile LOLOS (fix Batch6 berhasil). Build maju lebih jauh lagi sampai task `:app:checkReleaseAarMetadata`.
 - Root cause: `flutter_local_notifications` mewajibkan core library desugaring diaktifkan (requirement standar & terdokumentasi resmi untuk plugin ini) — belum diaktifkan di project.
 - Fix: `android/app/build.gradle.kts` -> `compileOptions.isCoreLibraryDesugaringEnabled = true` + dependency `coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")`

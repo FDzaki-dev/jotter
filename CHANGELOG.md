@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1_Batch16] - 2026-08-24
+### Added
+- AUDIT_ISSUES.md: tanam verdict eksternal UX/UI Polish (P0/P1/P2), cross-ref ke item audit existing, sisanya jadi Pending Queue baru. Dokumentasi murni.
+
 ## [v1_Batch15] - 2026-08-24
 ### Fixed
 - note_card.dart + calendar_screen.dart: judul note terkunci kini ikut disamarkan jadi "Catatan Terkunci" (sebelumnya cuma isi yg disamarkan, judul polos) (AUDIT High #5 resolved)

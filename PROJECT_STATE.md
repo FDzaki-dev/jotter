@@ -1,6 +1,14 @@
 # PROJECT_STATE — Jotter
 
-## [v1_Batch15] — 2026-08-24 (TERBARU)
+## [v1_Batch16] — 2026-08-24 (TERBARU)
+Dok: Tanam+adaptasi verdict eksternal `Jotter_v1_Batch14_UX_UI_POLISH.md` ke `AUDIT_ISSUES.md` (section baru "UX/UI POLISH BACKLOG"). Murni dokumentasi, 0 file kode diubah.
+- Verdict: proyek ~80-85% polished, surgical micro-fix only (DILARANG refactor/redesign/ganti arsitektur/DB/tab).
+- P0.1 (locked note masking) sudah RESOLVED (cross-ref audit #1 & #5). P0.2 (Calendar sync) = duplikat audit High #6. P0.3 (biometric/lock feedback) overlap audit Medium #9 + tambahan lock-screen CTA.
+- 6 item P1 baru (dirty-state dobel dgn High #7; 5 lainnya baru: action feedback, confirm delete, empty states, discoverability, checklist UX) + 4 item P2 baru (typography, spacing, color/border, hide dev info) dicatat sbg Pending Queue baru di AUDIT_ISSUES.md.
+- 1 file diubah (AUDIT_ISSUES.md), 1 task (dokumentasi).
+- **Next batch: P0.2 = audit High #6 (Calendar tab tidak reaktif)** sesuai urutan Logic P0 dari verdict.
+
+## [v1_Batch15] — 2026-08-24
 Fix: AUDIT High #5 — judul note terkunci tidak tersamarkan (hanya isi yg disamarkan).
 - `lib/widgets/note_card.dart`: title diganti "Catatan Terkunci" saat `note.isLocked` (Home grid/list).
 - `lib/screens/calendar_screen.dart`: title item reminder di tab Kalender diganti "Catatan Terkunci" saat `isLocked`.

@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -118,8 +120,8 @@ fun NoteEditorScreen(
 
             if (note.type == NoteType.CHECKLIST) {
                 Column(Modifier.weight(1f)) {
-                    androidx.compose.foundation.lazy.LazyColumn(Modifier.weight(1f)) {
-                        androidx.compose.foundation.lazy.items(note.checklistItems, key = { it.id }) { item ->
+                    LazyColumn(Modifier.weight(1f)) {
+                        items(note.checklistItems, key = { it.id }) { item ->
                             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                 IconButton(onClick = {
                                     note = note.copy(checklistItems = note.checklistItems.map {

@@ -17,6 +17,7 @@ import com.jotter.notes.viewmodel.NotesViewModel
 
 enum class FilteredMode { ARCHIVE, TRASH }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilteredNotesScreen(
     mode: FilteredMode,

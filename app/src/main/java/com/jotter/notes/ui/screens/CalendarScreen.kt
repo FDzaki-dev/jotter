@@ -22,6 +22,7 @@ import com.jotter.notes.ui.theme.noteColorFor
 import com.jotter.notes.viewmodel.NotesViewModel
 import java.util.Calendar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(viewModel: NotesViewModel = viewModel(), onOpenNote: (String) -> Unit) {
     val reminders by viewModel.reminderNotes.collectAsState()

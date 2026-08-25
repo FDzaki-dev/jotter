@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 
 enum class LockMode { SETUP, VERIFY }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LockScreen(
     mode: LockMode,

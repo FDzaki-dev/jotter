@@ -5,7 +5,15 @@
 - Nama file ZIP output: huruf besar di awal → `Jotter_v2_BatchN.zip`.
 - `Jotter` (kapital) = nama file/branding. `jotter` (kecil) = path/folder/repo/package.
 
-## [v2_Batch2] — 2026-08-25 (TERBARU)
+## [v2_Batch3] — 2026-08-25 (TERBARU)
+Progress: KSP2/Room bug (Batch2) LOLOS — build maju sampai `compileReleaseKotlin`, gagal dengan error compiler Dart^H^Hkotlin nyata (bukan lagi soal versi toolchain). Sumber: `build_output.log` dari artifact `logs_fail_2.0.0_22_03337bd` (pathway Batch2 kepakai, jalan persis seperti didesain).
+- **Root cause #1** (5 titik): `TopAppBar` Material3 itu experimental API, WAJIB `@OptIn(ExperimentalMaterial3Api::class)` di fungsi composable pemanggilnya. Lupa ditambahkan di 4 file: `CalendarScreen.kt`, `FilteredNotesScreen.kt`, `LockScreen.kt`, `SettingsScreen.kt` (HomeScreen & NoteEditorScreen sudah benar dari awal).
+- **Root cause #2** (bikin cascading error paling banyak): `NoteEditorScreen.kt` manggil extension function `items()` pakai nama fully-qualified inline (`androidx.compose.foundation.lazy.items(...)`) di dalam `LazyColumn{}` — Kotlin GAGAL resolve implicit receiver `LazyListScope` dengan cara pemanggilan itu, hasilnya "Unresolved reference" berantai ke semua kode di dalam lambda-nya (id/isChecked/text/@Composable invocation dst — semua itu FALSE ALARM turunan dari 1 akar masalah ini, bukan 6 bug terpisah). Fix: `import androidx.compose.foundation.lazy.items` yang benar + panggil `items(...)` tanpa prefix.
+- Proaktif: grep ulang SELURUH project cari pola sama (`androidx.compose.foundation.lazy.` inline) — cuma 1 titik itu, sudah bersih semua.
+- 5 file diubah (di atas batas normal 3, tapi 1 task jelas: "perbaiki error compiler dari log ini", semua fix mekanis/sejenis, root cause sudah pasti dari pesan error, bukan eksplorasi coba-coba).
+- Belum diverifikasi CI.
+
+## [v2_Batch2] — 2026-08-25
 Fix + fitur baru dari user:
 1. **Fix build**: `Task :app:kspReleaseKotlin FAILED - unexpected jvm signature V`. Dicek via web search — konfirmasi ini **bug resmi terdokumentasi di KSP2** (google/ksp#2957): KSP2 (Analysis API baru, KSP 2.0.0+) punya bug spesifik memproses method Room DAO `suspend fun` yang return `Unit` implisit — PERSIS pola semua method di `NoteDao.kt` (`upsert`, `update`, `setArchived`, dst). Fix terkonfirmasi dari real-world case (bukan tebakan): bump Room 2.6.1 → 2.7.0 di `app/build.gradle.kts` (3 baris: room-runtime, room-ktx, room-compiler — WAJIB bareng, versi beda2 juga bisa jadi penyebab error yang sama).
 2. **Fitur baru**: pathway artifact GitHub khusus untuk log kegagalan, `logs_fail_<versionName>_<run-number>_<short-sha>`. `release.yml` diubah: step "Determine version identifiers" dipindah ke awal (supaya tersedia walau build gagal), step build sekarang nge-tee output ke `build_output.log` (pakai `set -o pipefail` supaya exit code gagal tetap kepropagate, gak ketutup sama `tee`), step baru `Upload failure logs` (`if: failure()`) upload `build_output.log` + `app/build/reports/` sebagai artifact bernama sesuai pola diminta. Muncul otomatis di halaman run Actions kalau build gagal, gak perlu klik gear "Download log archive" lagi.

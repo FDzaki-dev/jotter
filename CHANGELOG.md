@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v2_Batch3] - 2026-08-25
+### Fixed
+- CalendarScreen.kt, FilteredNotesScreen.kt, LockScreen.kt, SettingsScreen.kt: add missing @OptIn(ExperimentalMaterial3Api::class) for TopAppBar
+- NoteEditorScreen.kt: fix fully-qualified items() call not resolving LazyListScope receiver (root cause of 6 cascading "Unresolved reference" errors) - proper import instead
+
 ## [v2_Batch2] - 2026-08-25
 ### Fixed
 - app/build.gradle.kts: Room 2.6.1 -> 2.7.0 (confirmed google/ksp#2957 - KSP2 bug with Room suspend-Unit DAO methods)

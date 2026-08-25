@@ -1,0 +1,19 @@
+# Gradle/Android
+.gradle/
+build/
+*.iml
+.idea/
+local.properties
+captures/
+
+# Signing - never commit
+key.properties
+*.keystore
+*.jks
+release.keystore
+
+# macOS
+.DS_Store
+
+# Logs
+*.log

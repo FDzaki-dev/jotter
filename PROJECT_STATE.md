@@ -4,6 +4,7 @@
 - Folder lokal / repo GitHub / package Android: SELALU huruf kecil → `jotter`, `com.jotter.notes`.
 - Nama file ZIP output: huruf besar di awal → `Jotter_v2_BatchN.zip`.
 - `Jotter` (kapital) = nama file/branding. `jotter` (kecil) = path/folder/repo/package.
+- **[INSIDEN Batch4, 2026-08-25] DILARANG KERAS pakai exclude-pattern generik (`zip -x ".*"` atau sejenisnya) saat packaging ZIP proyek ini.** Kejadian: flag itu ikut membuang `.gitattributes`, `.gitignore`, `.github/workflows/release.yml` dari ZIP rilis. Karena Termux `DAILY UPDATE` script (immutable) cuma spare folder `.git` (bukan pola dotfile lain) saat wipe-and-replace, file2 itu ikut ke-`rm -rf` dari repo lokal lalu ke-`git add -A` + push sebagai commit yang MENGHAPUS-nya dari GitHub juga — CI workflow sempat lenyap dari repo tanpa disadari sampai user ngeh. WAJIB: setiap packaging ZIP, SEMUA dotfile/dotfolder project (`.gitattributes`, `.gitignore`, `.github/`) IKUT ke dalam ZIP tanpa exclude apapun (satu2nya yang boleh diexclude, kalau ada, adalah folder `.git` VCS internal itu sendiri — bukan dotfile lain). WAJIB verifikasi isi ZIP (`unzip -l`) sebelum present ke user, cek dotfile penting ada.
 
 ## [v2_Batch4] — 2026-08-25 (TERBARU)
 Progress: Batch3 LOLOS — build maju sampai `minifyReleaseWithR8` (proses build sudah sampai tahap terakhir sebelum APK jadi). Sumber: `build_output.log` dari artifact `logs_fail_2.0.0_23_bec5e15`.

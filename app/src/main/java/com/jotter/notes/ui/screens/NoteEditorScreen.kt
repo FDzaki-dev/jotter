@@ -42,6 +42,7 @@ fun NoteEditorScreen(
 ) {
     val scope = rememberCoroutineScope()
     var note by remember { mutableStateOf(Note()) }
+    var originalNote by remember { mutableStateOf<Note?>(if (noteId == null) note else null) }
     var isNew by remember { mutableStateOf(noteId == null) }
     var loaded by remember { mutableStateOf(noteId == null) }
     var showColorPicker by remember { mutableStateOf(false) }
@@ -50,14 +51,18 @@ fun NoteEditorScreen(
 
     LaunchedEffect(noteId) {
         if (noteId != null) {
-            viewModel.getById(noteId)?.let { note = it; isNew = false }
+            viewModel.getById(noteId)?.let { note = it; isNew = false; originalNote = it }
             loaded = true
         }
     }
 
+    // Dirty-check (audit High #7 / verdict P1.4): hanya panggil saveNote() kalau memang ada
+    // perubahan dari state awal. Sebelumnya, buka catatan lama lalu langsung back TANPA
+    // edit apapun tetap memicu save -> modifiedAt ke-bump padahal isinya identik.
     fun saveAndExit() {
-        val isEmpty = note.title.isBlank() && note.content.isBlank() && note.checklistItems.isEmpty()
-        if (!(isEmpty && isNew)) {
+        val isEmptyNew = isNew && note.title.isBlank() && note.content.isBlank() && note.checklistItems.isEmpty()
+        val hasChanges = originalNote != null && note != originalNote
+        if (!isEmptyNew && hasChanges) {
             viewModel.saveNote(note)
         }
         onBack()

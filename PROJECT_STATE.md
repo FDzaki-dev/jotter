@@ -5,7 +5,14 @@
 - Nama file ZIP output: huruf besar di awal → `Jotter_v2_BatchN.zip`.
 - `Jotter` (kapital) = nama file/branding. `jotter` (kecil) = path/folder/repo/package.
 
-## [v2_Batch3] — 2026-08-25 (TERBARU)
+## [v2_Batch4] — 2026-08-25 (TERBARU)
+Progress: Batch3 LOLOS — build maju sampai `minifyReleaseWithR8` (proses build sudah sampai tahap terakhir sebelum APK jadi). Sumber: `build_output.log` dari artifact `logs_fail_2.0.0_23_bec5e15`.
+- **Root cause**: `androidx.security:security-crypto` (dipakai untuk PIN lock, EncryptedSharedPreferences) bawa dependency transitif Google Tink, yang mereferensikan annotation compile-time-only (`com.google.errorprone.annotations.*`, `javax.annotation.Nullable`, `javax.annotation.concurrent.GuardedBy`) — library ini gak ada di runtime classpath, R8 gagal resolve → `minifyReleaseWithR8 FAILED`.
+- Fix: tambah 6 baris `-dontwarn` di `app/proguard-rules.pro` persis sesuai nama class yang disebut di log error (bukan tebakan generik) — ini rekomendasi resmi dari proyek Tink sendiri untuk kasus ini, tidak mempengaruhi fungsi enkripsi (annotation-only, tidak dipanggil saat runtime).
+- 1 file diubah (`app/proguard-rules.pro`), 1 task, root cause pasti dari pesan error R8.
+- Belum diverifikasi CI.
+
+## [v2_Batch3] — 2026-08-25
 Progress: KSP2/Room bug (Batch2) LOLOS — build maju sampai `compileReleaseKotlin`, gagal dengan error compiler Dart^H^Hkotlin nyata (bukan lagi soal versi toolchain). Sumber: `build_output.log` dari artifact `logs_fail_2.0.0_22_03337bd` (pathway Batch2 kepakai, jalan persis seperti didesain).
 - **Root cause #1** (5 titik): `TopAppBar` Material3 itu experimental API, WAJIB `@OptIn(ExperimentalMaterial3Api::class)` di fungsi composable pemanggilnya. Lupa ditambahkan di 4 file: `CalendarScreen.kt`, `FilteredNotesScreen.kt`, `LockScreen.kt`, `SettingsScreen.kt` (HomeScreen & NoteEditorScreen sudah benar dari awal).
 - **Root cause #2** (bikin cascading error paling banyak): `NoteEditorScreen.kt` manggil extension function `items()` pakai nama fully-qualified inline (`androidx.compose.foundation.lazy.items(...)`) di dalam `LazyColumn{}` — Kotlin GAGAL resolve implicit receiver `LazyListScope` dengan cara pemanggilan itu, hasilnya "Unresolved reference" berantai ke semua kode di dalam lambda-nya (id/isChecked/text/@Composable invocation dst — semua itu FALSE ALARM turunan dari 1 akar masalah ini, bukan 6 bug terpisah). Fix: `import androidx.compose.foundation.lazy.items` yang benar + panggil `items(...)` tanpa prefix.

@@ -1,4 +1,48 @@
-# PROJECT_STATE — Jotter
+# PROJECT_STATE — Jotter (Native Kotlin + Jetpack Compose)
+
+## ⚠️ ATURAN PERMANEN (selalu di sini, tidak ikut descending)
+- Folder lokal / repo GitHub / package Android: SELALU huruf kecil → `jotter`, `com.jotter.notes`.
+- Nama file ZIP output: huruf besar di awal → `Jotter_v2_BatchN.zip`.
+- `Jotter` (kapital) = nama file/branding. `jotter` (kecil) = path/folder/repo/package.
+
+## [v2_Batch1] — 2026-08-25 (TERBARU) — ARSITEKTUR PIVOT: Flutter -> Native Kotlin
+**Alasan pivot**: preferensi permanen user dari awal sesi eksplisit "WAJIB Native Kotlin + Jetpack Compose, DILARANG framework hybrid (Anti-Flutter)". Batch1-21 salah pakai Flutter (ke-trigger karena request awal user menyebut nama widget Cupertino). Setelah bug back-gesture di Flutter (PopScope/onPopInvoked) gak kunjung tuntas dan user eksplisit minta pindah, ini dikoreksi ke arsitektur yang benar dari awal.
+**Versioning**: reset ke v2 (bukan v1_Batch22) karena ini rewrite total, bukan lanjutan kode yang sama. Nomor batch di dalam v2 mulai dari 1 lagi.
+
+### Kenapa ini menyelesaikan root masalah gesture/back
+Flutter's `PopScope` + `onPopInvoked` adalah shim framework di atas platform - terbukti py bug (flutter/flutter#138624) dan berkali-kali "kosmetik". Native Kotlin pakai:
+- **Navigation Compose** (`NavController.popBackStack()`) + **`BackHandler`** (androidx.activity.compose) — ini API resmi Android sendiri (`OnBackPressedDispatcher`), bukan lapisan tambahan. Gesture back & tombol back keduanya lewat mekanisme SISTEM yang sama, tidak ada celah "gesture gak fire tapi tombol fire" seperti di Flutter.
+- **Predictive back** (`enableOnBackInvokedCallback=true` di manifest) otomatis kompatibel karena BackHandler terhubung langsung ke dispatcher yang sama yang dipakai predictive back.
+
+### Fitur yang di-porting (functional parity dengan versi Flutter v1_Batch21)
+Teks & checklist note, 9 warna (iOS system color hex asli), kalender (hand-rolled month grid, Compose gak punya built-in), sort 4 mode + search, archive & trash, PIN lock (EncryptedSharedPreferences + SHA-256 salted, native Android Keystore-backed) + biometric (BiometricPrompt asli, bukan lewat plugin), grid/list toggle, swipe-to-archive/delete (Material3 `SwipeToDismissBox`, native), reminder (`AlarmManager` + `NotificationCompat`, native — bukan lewat plugin flutter_local_notifications lagi), crash logger (Kotlin murni, **file `CrashLogWriter.kt` di-reuse hampir 100% dari versi Flutter** — memang sudah native dari awal, cuma `MainActivity`-nya yang berubah karena gak ada MethodChannel/Dart lagi).
+
+### Yang TIDAK di-porting / disederhanakan (jujur, bukan menyembunyikan)
+- Large-title-collapse pakai `LargeTopAppBar` Material3 bawaan Compose (sama konsepnya dengan CupertinoSliverNavigationBar) — belum discroll-test.
+- Kalender: hand-rolled grid sederhana, bukan library sekomplit table_calendar — cukup untuk fitur "tampilkan pengingat per tanggal" tapi visualnya lebih plain.
+- Font: TETAP sistem default (Roboto) — alasan sama dari awal (lisensi SF Pro).
+- Boot receiver (`BootReceiver.kt`) masih KOSONG (placeholder) — `AlarmManager.setExactAndAllowWhileIdle` tidak survive reboot di banyak OEM, reschedule-on-boot belum diimplementasi (butuh baca semua note dgn reminder dari Room saat boot). Dicatat sebagai pending, bukan diklaim selesai.
+
+### Regresi yang ditemukan & DIPERBAIKI saat porting (bukan bug baru dari Batch1, tapi hal yang sudah pernah di-fix di versi Flutter dan sempat ke-reintroduce saat nulis ulang - ketahuan sendiri sebelum sempat di-ship)
+Sumber deteksi: `AUDIT_ISSUES.md` yang ikut di-carry-over dari versi Flutter — dipakai sebagai checklist regresi saat porting, bukan cuma arsip pasif.
+- Notifikasi reminder note terkunci sempat balik bocorin title+content asli (harusnya generik "Catatan terkunci memiliki pengingat") → `ReminderScheduler.kt` diperbaiki sebelum batch ini selesai.
+- Reminder note yang di-trash/permanent-delete sempat gak ke-cancel → `NotesViewModel.kt` `trashNote`/`permanentDelete` diperbaiki.
+- Title note terkunci sempat balik kelihatan polos (cuma content yg ke-mask) → `NoteCard.kt` + `CalendarScreen.kt` diperbaiki.
+- Reschedule-on-app-open (reminder re-arm setelah reboot) sempat cuma placeholder kosong → diimplementasi di `MainActivity.onCreate`.
+- Item yang MASIH belum di-port (jujur, dicatat sebagai pending, bukan diklaim selesai): dirty-check editor (audit High #7), pesan error saat biometric gagal available (audit Medium #9), instant-on-boot receiver asli (BootReceiver.kt masih placeholder, cuma reschedule-on-open yang jalan).
+
+
+- **Gradle wrapper TIDAK di-generate** — `gradle-wrapper.jar` adalah file BINARY, sandbox ini tanpa network tidak bisa mengunduhnya, dan tidak ada instalasi Gradle lokal untuk men-generate-nya sendiri. Solusi: workflow CI pakai `gradle/actions/setup-gradle@v4` yang meng-install Gradle langsung di runner (runner PUNYA network). Konsekuensi: kalau mau build manual di Termux/lokal nanti, perlu install Gradle sendiri (`pkg install gradle` atau setara) — gak bisa pakai `./gradlew` karena filenya memang sengaja tidak diikutkan (drpd. commit wrapper palsu/rusak).
+- Package `com.jotter.notes`, minSdk 31, compileSdk/targetSdk 35, Kotlin 2.2.20, AGP 8.11.1 (versi2 ini SUDAH terbukti kompatibel dari perjuangan Batch1-4 versi Flutter, dipakai lagi di sini karena base-nya sama, cuma plugin Flutter dicabut).
+- **Keystore signing DI-REUSE** dari `release.keystore` versi Flutter (alias `jotter_release`, password sama) — BUKAN generate baru. Ini penting: kalau generate baru, APK baru gak akan bisa "update" over APK Flutter yang sudah terinstall (beda cert = Android tolak install kecuali uninstall dulu). Secrets GitHub yang sudah di-set dari Batch1 (`ANDROID_KEYSTORE_BASE64` dkk) TIDAK PERLU diubah/di-set ulang.
+- Belum dicompile lokal (sandbox tanpa Android SDK/Gradle nyata) — CI run pertama yang membuktikan.
+
+## [v1_Batch21 dan sebelumnya — Flutter, DIHENTIKAN]
+Lihat riwayat lengkap di CHANGELOG.md bagian bawah (v1_*) untuk jejak Flutter yang sudah tidak dilanjutkan.
+
+---
+
+# ARSIP: Riwayat lengkap versi Flutter (v1_Batch1 - v1_Batch21, dihentikan)
 
 ## ⚠️ ATURAN PERMANEN (baca sebelum eksekusi command apapun — tidak ikut aturan descending, selalu di sini)
 - **Folder lokal / nama repo GitHub / package Android**: SELALU huruf kecil semua → `jotter` (contoh: `~/projects/jotter`, `gh repo create jotter`, `com.jotter.notes`). JANGAN PERNAH `Jotter`/`JOTTER` dsb di path/folder/repo — Termux/Linux case-sensitive, huruf kapital bikin folder BEDA & terpisah dari yang sudah ke-push ke GitHub → desync.

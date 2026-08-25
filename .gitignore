@@ -1,24 +1,16 @@
-# Flutter/Dart
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
+# Gradle/Android
+.gradle/
 build/
 *.iml
-*.ipr
-*.iws
 .idea/
+local.properties
+captures/
 
-# Android
-android/local.properties
-android/key.properties
+# Signing - never commit
 key.properties
 *.keystore
 *.jks
 release.keystore
-android/.gradle/
-android/captures/
 
 # macOS
 .DS_Store

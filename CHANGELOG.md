@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## [v2_Batch1] - 2026-08-25 — ARSITEKTUR PIVOT
+### Changed
+- REWRITE TOTAL: Flutter -> Native Kotlin + Jetpack Compose (koreksi ke preferensi permanen "Anti-Flutter" yang terlewat di awal)
+- Semua fitur v1_Batch21 di-porting: notes (teks/checklist), 9 warna, kalender, sort+search, archive/trash, PIN+biometric lock, grid/list, swipe actions, reminder, crash logger
+- Root cause bug gesture/back (flutter/flutter#138624) TIDAK ADA lagi di arsitektur ini - Navigation Compose + BackHandler pakai OnBackPressedDispatcher asli Android, bukan shim framework
+- Keystore signing di-reuse (bukan baru) - APK native ini bisa update over install Flutter lama
+- CI: ganti dari Flutter toolchain ke native Gradle (gradle/actions/setup-gradle, tanpa Flutter SDK setup)
+
+### Known limitations (lihat PROJECT_STATE.md)
+- Boot receiver reminder belum diimplementasi penuh (placeholder)
+- Kalender hand-rolled (bukan library sekomplit sebelumnya)
+- Belum di-compile/verifikasi CI (initial commit arsitektur baru)
+
+---
+# ARSIP: CHANGELOG lengkap versi Flutter (v1_Batch1 - v1_Batch21, dihentikan)
+
 ## [v1_Batch21] - 2026-08-24
 ### Docs
 - PROJECT_STATE.md: tambah section ATURAN PERMANEN - jotter (lowercase) untuk path/folder/repo/package, Jotter (capital) untuk nama file ZIP

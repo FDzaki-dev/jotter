@@ -1,19 +1,18 @@
-# Jotter
+# Jotter (Native Kotlin + Jetpack Compose)
 
-Aplikasi catatan 100% offline dengan gaya iOS (Cupertino). Teks & checklist, 9 warna kategori, kalender + pengingat, arsip, sampah, kunci PIN/biometrik, grid/list, pencarian & pengurutan penuh.
+Aplikasi catatan 100% offline, gaya iOS. Rewrite total dari versi Flutter (lihat PROJECT_STATE.md untuk alasan). Teks & checklist, 9 warna kategori, kalender + pengingat, arsip, sampah, kunci PIN/biometrik, grid/list, pencarian & pengurutan penuh.
 
 ## Build otomatis (GitHub Actions)
-Push ke `main` -> workflow build & sign APK -> otomatis terbit sebagai GitHub Release (lihat sidebar repo).
+Push ke `main` -> workflow build & sign APK (native Gradle, tanpa Flutter SDK) -> otomatis terbit sebagai GitHub Release.
 
-## Build manual (butuh Flutter SDK)
+## Build manual (butuh Android SDK + Gradle terinstall - proyek ini TIDAK menyertakan gradlew, lihat PROJECT_STATE.md)
 ```
-flutter pub get
-flutter build apk --release
+gradle :app:assembleRelease
 ```
-APK: `build/app/outputs/flutter-apk/app-release.apk`
+APK per-arsitektur: `app/build/outputs/apk/release/`
 
 ## Struktur & keputusan teknis
-Lihat `PROJECT_STATE.md` (arsitektur, protected assets, pending queue) dan `CHANGELOG.md` (riwayat rilis).
+Lihat `PROJECT_STATE.md` (arsitektur, alasan pivot dari Flutter, protected assets, pending queue) dan `CHANGELOG.md`.
 
 ## Keamanan
-`android/release.keystore` & `android/key.properties` sudah di-gitignore (tidak pernah ter-commit). Kredensial signing untuk CI dikirim terpisah lewat `gh secret set` (lihat file *_secrets.txt saat setup awal).
+`release.keystore` & `key.properties` di-gitignore. Kredensial signing sama dengan versi Flutter sebelumnya (di-reuse, sudah ada di GitHub Secrets - tidak perlu di-set ulang).

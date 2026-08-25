@@ -21,23 +21,18 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          channel: 'stable'
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
+          gradle-version: '8.14'
 
       - name: Decode keystore
         run: |
-          mkdir -p android
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/release.keystore
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > release.keystore
 
       - name: Write key.properties
         run: |
-          cat > android/key.properties <<PROPS
+          cat > key.properties <<PROPS
           storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
           keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
@@ -45,7 +40,7 @@ jobs:
           PROPS
 
       - name: Build release APK
-        run: flutter build apk --release --split-per-abi
+        run: gradle :app:assembleRelease --no-daemon
 
       - name: Stale run guard
         run: |
@@ -66,5 +61,5 @@ jobs:
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
           name: "Jotter ${{ steps.ver.outputs.tag }}"
-          files: build/app/outputs/flutter-apk/app-*-release.apk
+          files: app/build/outputs/apk/release/app-*-release.apk
           make_latest: true

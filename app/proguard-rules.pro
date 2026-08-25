@@ -1,0 +1,2 @@
+-keep class com.jotter.notes.data.** { *; }
+-keepattributes *Annotation*

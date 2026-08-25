@@ -103,5 +103,10 @@ dependencies {
 
     implementation("androidx.work:work-runtime-ktx:2.10.0")
 
+    // In-app updater: cek & download rilis dari GitHub Releases API.
+    // WAJIB streaming chunk-by-chunk (bukan readBytes() penuh ke RAM) - lihat ReleaseDownloader.kt.
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okio:okio:3.9.0")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

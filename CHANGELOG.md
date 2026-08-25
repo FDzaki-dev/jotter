@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v2_Batch2] - 2026-08-25
+### Fixed
+- app/build.gradle.kts: Room 2.6.1 -> 2.7.0 (confirmed google/ksp#2957 - KSP2 bug with Room suspend-Unit DAO methods)
+### Added
+- release.yml: failure-log artifact pathway `logs_fail_<version>_<run-number>_<sha>` via actions/upload-artifact, auto-uploads on build failure
+
 ## [v2_Batch1] - 2026-08-25 — ARSITEKTUR PIVOT
 ### Changed
 - REWRITE TOTAL: Flutter -> Native Kotlin + Jetpack Compose (koreksi ke preferensi permanen "Anti-Flutter" yang terlewat di awal)

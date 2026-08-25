@@ -5,7 +5,14 @@
 - Nama file ZIP output: huruf besar di awal → `Jotter_v2_BatchN.zip`.
 - `Jotter` (kapital) = nama file/branding. `jotter` (kecil) = path/folder/repo/package.
 
-## [v2_Batch1] — 2026-08-25 (TERBARU) — ARSITEKTUR PIVOT: Flutter -> Native Kotlin
+## [v2_Batch2] — 2026-08-25 (TERBARU)
+Fix + fitur baru dari user:
+1. **Fix build**: `Task :app:kspReleaseKotlin FAILED - unexpected jvm signature V`. Dicek via web search — konfirmasi ini **bug resmi terdokumentasi di KSP2** (google/ksp#2957): KSP2 (Analysis API baru, KSP 2.0.0+) punya bug spesifik memproses method Room DAO `suspend fun` yang return `Unit` implisit — PERSIS pola semua method di `NoteDao.kt` (`upsert`, `update`, `setArchived`, dst). Fix terkonfirmasi dari real-world case (bukan tebakan): bump Room 2.6.1 → 2.7.0 di `app/build.gradle.kts` (3 baris: room-runtime, room-ktx, room-compiler — WAJIB bareng, versi beda2 juga bisa jadi penyebab error yang sama).
+2. **Fitur baru**: pathway artifact GitHub khusus untuk log kegagalan, `logs_fail_<versionName>_<run-number>_<short-sha>`. `release.yml` diubah: step "Determine version identifiers" dipindah ke awal (supaya tersedia walau build gagal), step build sekarang nge-tee output ke `build_output.log` (pakai `set -o pipefail` supaya exit code gagal tetap kepropagate, gak ketutup sama `tee`), step baru `Upload failure logs` (`if: failure()`) upload `build_output.log` + `app/build/reports/` sebagai artifact bernama sesuai pola diminta. Muncul otomatis di halaman run Actions kalau build gagal, gak perlu klik gear "Download log archive" lagi.
+- 2 file diubah (`app/build.gradle.kts`, `.github/workflows/release.yml`), 2 task tapi diminta bareng ("sekalian") dalam 1 pesan user, sesuai batas 3 file.
+- Belum diverifikasi CI.
+
+## [v2_Batch1] — 2026-08-25
 **Alasan pivot**: preferensi permanen user dari awal sesi eksplisit "WAJIB Native Kotlin + Jetpack Compose, DILARANG framework hybrid (Anti-Flutter)". Batch1-21 salah pakai Flutter (ke-trigger karena request awal user menyebut nama widget Cupertino). Setelah bug back-gesture di Flutter (PopScope/onPopInvoked) gak kunjung tuntas dan user eksplisit minta pindah, ini dikoreksi ke arsitektur yang benar dari awal.
 **Versioning**: reset ke v2 (bukan v1_Batch22) karena ini rewrite total, bukan lanjutan kode yang sama. Nomor batch di dalam v2 mulai dari 1 lagi.
 

@@ -161,8 +161,26 @@ fun NoteEditorScreen(
                                 }
                                 Text(item.text, modifier = Modifier.weight(1f))
                                 IconButton(onClick = {
+                                    // Feedback+undo (P1.9) - sebelumnya senyap total, item lenyap
+                                    // tanpa jejak. Pola identik archiveWithUndo/deleteWithUndo di
+                                    // HomeScreen: hapus dulu (biar responsif), tawarkan "Urungkan"
+                                    // yang masukin balik item PERSIS di posisi semula (bukan di-append
+                                    // ke akhir list, biar urutan checklist gak berantakan kalau di-undo).
+                                    val removedIndex = note.checklistItems.indexOfFirst { it.id == item.id }
                                     note = note.copy(checklistItems = note.checklistItems.filter { it.id != item.id })
-                                }) { Icon(Icons.Default.Close, null, modifier = Modifier.size(18.dp)) }
+                                    scope.launch {
+                                        val result = snackbarHostState.showSnackbar(
+                                            message = "Item dihapus",
+                                            actionLabel = "Urungkan",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            note = note.copy(checklistItems = note.checklistItems.toMutableList().apply {
+                                                add(removedIndex.coerceIn(0, size), item)
+                                            })
+                                        }
+                                    }
+                                }) { Icon(Icons.Default.Close, "Hapus item", modifier = Modifier.size(22.dp)) }
                             }
                         }
                     }
@@ -179,7 +197,7 @@ fun NoteEditorScreen(
                                 note = note.copy(checklistItems = note.checklistItems + ChecklistItem(text = newChecklistText.trim()))
                                 newChecklistText = ""
                             }
-                        }) { Icon(Icons.Default.AddCircle, null) }
+                        }) { Icon(Icons.Default.AddCircle, "Tambah item") }
                     }
                 }
             } else {

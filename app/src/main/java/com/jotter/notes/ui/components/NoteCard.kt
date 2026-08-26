@@ -22,6 +22,7 @@ import com.jotter.notes.data.Note
 import com.jotter.notes.data.NoteType
 import com.jotter.notes.ui.theme.JotterSurface
 import com.jotter.notes.ui.theme.noteColorFor
+import java.util.Calendar
 
 // Native Compose swipe-to-reveal-actions - real gesture handling via SwipeToDismissBox,
 // no third-party plugin indirection (this replaces the flaky flutter_slidable approach).
@@ -91,7 +92,22 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit) {
             Spacer(Modifier.width(6.dp))
             if (note.isLocked) Icon(Icons.Default.Lock, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
             Spacer(Modifier.weight(1f))
-            if (note.reminderAt != null) Icon(Icons.Default.Notifications, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+            note.reminderAt?.let { reminderAt ->
+                if (note.isLocked) {
+                    // Note terkunci: cukup tunjukkan ADA pengingat (perilaku lama, sudah aman),
+                    // tapi JANGAN tampilkan tanggal/jam spesifik — itu metadata baru yang bisa
+                    // bocorkan konteks note terkunci, melanggar invariant masking (Batch1/11/13).
+                    Icon(Icons.Default.Notifications, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+                } else {
+                    val isOverdue = reminderAt < System.currentTimeMillis()
+                    val reminderColor = if (isOverdue) Color(0xFFFF3B30) else Color.Gray
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Notifications, null, tint = reminderColor, modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(3.dp))
+                        Text(formatReminderBadge(reminderAt), color = reminderColor, style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
         }
         Spacer(Modifier.height(6.dp))
         if (note.title.isNotEmpty() && !note.isLocked) {
@@ -117,4 +133,16 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit) {
             else -> Text(note.content, maxLines = 4, overflow = TextOverflow.Ellipsis, color = Color.Gray)
         }
     }
+}
+
+/** "14:30" kalau hari ini, "26 Agu 14:30" kalau bukan — biar badge di kartu sempit (grid 2 kolom) tetap ringkas. */
+private fun formatReminderBadge(reminderAt: Long): String {
+    val cal = Calendar.getInstance().apply { timeInMillis = reminderAt }
+    val now = Calendar.getInstance()
+    val timeStr = "%02d:%02d".format(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
+    val isToday = cal.get(Calendar.YEAR) == now.get(Calendar.YEAR) &&
+        cal.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR)
+    if (isToday) return timeStr
+    val dateFmt = java.text.SimpleDateFormat("d MMM", java.util.Locale("id", "ID"))
+    return "${dateFmt.format(cal.time)} $timeStr"
 }

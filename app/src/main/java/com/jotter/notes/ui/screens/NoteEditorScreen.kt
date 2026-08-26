@@ -6,9 +6,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -303,7 +305,11 @@ private fun ReminderPickerSheet(
     )
 
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(16.dp)) {
+        Column(
+            Modifier
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = onClear) { Text("Hapus Pengingat") }
                 TextButton(onClick = {
@@ -316,6 +322,7 @@ private fun ReminderPickerSheet(
             }
             DatePicker(state = datePickerState, showModeToggle = false)
             TimePicker(state = timePickerState, modifier = Modifier.padding(16.dp))
+            Spacer(Modifier.height(16.dp))
         }
     }
 }

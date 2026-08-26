@@ -134,7 +134,7 @@ fun SettingsScreen(
 
             Spacer(Modifier.weight(1f))
             Text(
-                "Jotter v2.0 (Native Kotlin) · 100% offline · Log crash tersimpan di Documents/Jotter/logs",
+                "Jotter · 100% offline, semua catatan tersimpan di perangkat ini",
                 modifier = Modifier.padding(16.dp).fillMaxWidth(),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.labelSmall

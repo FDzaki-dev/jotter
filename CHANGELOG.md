@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v2_Batch24] - 2026-08-26
+### Changed
+- NoteCard.kt: apply titleMedium/bodySmall typography tokens (P2.10) to title/content/checklist text; card padding 12dp->14dp, header spacing 6dp->8dp, checklist item spacing added (P2.11 spacing/proportion)
+
 ## [v2_Batch3] - 2026-08-25
 ### Fixed
 - CalendarScreen.kt, FilteredNotesScreen.kt, LockScreen.kt, SettingsScreen.kt: add missing @OptIn(ExperimentalMaterial3Api::class) for TopAppBar

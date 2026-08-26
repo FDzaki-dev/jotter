@@ -22,6 +22,7 @@ app/src/main/java/com/jotter/notes/notification/BootReceiver.kt
 app/src/main/java/com/jotter/notes/notification/ReminderReceiver.kt
 app/src/main/java/com/jotter/notes/notification/ReminderScheduler.kt
 app/src/main/java/com/jotter/notes/ui/components/NoteCard.kt
+app/src/main/java/com/jotter/notes/ui/components/UpdateDialog.kt
 app/src/main/java/com/jotter/notes/ui/navigation/NavGraph.kt
 app/src/main/java/com/jotter/notes/ui/screens/CalendarScreen.kt
 app/src/main/java/com/jotter/notes/ui/screens/FilteredNotesScreen.kt
@@ -31,12 +32,15 @@ app/src/main/java/com/jotter/notes/ui/screens/NoteEditorScreen.kt
 app/src/main/java/com/jotter/notes/ui/screens/SettingsScreen.kt
 app/src/main/java/com/jotter/notes/ui/theme/Color.kt
 app/src/main/java/com/jotter/notes/ui/theme/Theme.kt
+app/src/main/java/com/jotter/notes/updater/ReleaseDownloader.kt
+app/src/main/java/com/jotter/notes/updater/UpdateChecker.kt
 app/src/main/java/com/jotter/notes/viewmodel/NotesViewModel.kt
 app/src/main/java/com/jotter/notes/viewmodel/SettingsViewModel.kt
 app/src/main/res/drawable/ic_launcher_foreground.xml
 app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
 app/src/main/res/values/colors.xml
 app/src/main/res/values/themes.xml
+app/src/main/res/xml/file_paths.xml
 build.gradle.kts
 gradle.properties
 key.properties

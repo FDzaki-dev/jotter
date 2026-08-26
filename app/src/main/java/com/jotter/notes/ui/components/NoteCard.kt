@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jotter.notes.data.Note
@@ -85,7 +84,7 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit) {
             .background(JotterSurface)
             .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(16.dp))
             .clickable(onClick = onTap)
-            .padding(12.dp)
+            .padding(14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(10.dp).clip(CircleShape).background(borderColor))
@@ -109,16 +108,16 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit) {
                 }
             }
         }
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(8.dp))
         if (note.title.isNotEmpty() && !note.isLocked) {
-            Text(note.title, maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold)
+            Text(note.title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
         } else if (note.isLocked) {
-            Text("Catatan Terkunci", maxLines = 1, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold, color = Color.Gray)
+            Text("Catatan Terkunci", maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium, color = Color.Gray)
         }
-        Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(6.dp))
         when {
-            note.isLocked -> Text("•••••••", color = Color.Gray)
-            note.type == NoteType.CHECKLIST -> Column {
+            note.isLocked -> Text("•••••••", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+            note.type == NoteType.CHECKLIST -> Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 note.checklistItems.take(3).forEach { item ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -126,11 +125,11 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit) {
                             null, tint = Color.Gray, modifier = Modifier.size(14.dp)
                         )
                         Spacer(Modifier.width(4.dp))
-                        Text(item.text, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color.Gray)
+                        Text(item.text, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
-            else -> Text(note.content, maxLines = 4, overflow = TextOverflow.Ellipsis, color = Color.Gray)
+            else -> Text(note.content, maxLines = 4, overflow = TextOverflow.Ellipsis, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

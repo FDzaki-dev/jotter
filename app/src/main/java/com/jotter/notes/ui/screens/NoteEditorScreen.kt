@@ -3,10 +3,11 @@ package com.jotter.notes.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -264,7 +266,7 @@ fun NoteEditorScreen(
 @Composable
 private fun FlowRowColors(selectedIndex: Int, onPick: (Int) -> Unit) {
     androidx.compose.foundation.layout.FlowRow(
-        modifier = Modifier.fillMaxWidth().padding(20.dp),
+        modifier = Modifier.fillMaxWidth().padding(20.dp).selectableGroup(),
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         NoteColors.forEachIndexed { index, option ->
@@ -277,7 +279,8 @@ private fun FlowRowColors(selectedIndex: Int, onPick: (Int) -> Unit) {
                     .then(
                         if (selected) Modifier.border(2.dp, Color.White, CircleShape) else Modifier
                     )
-                    .clickable { onPick(index) }
+                    .selectable(selected = selected, onClick = { onPick(index) }, role = Role.RadioButton)
+                    .semantics { contentDescription = "Warna ${option.label}" }
             )
         }
     }

@@ -48,6 +48,7 @@ fun NoteEditorScreen(
     var showColorPicker by remember { mutableStateOf(false) }
     var showReminderPicker by remember { mutableStateOf(false) }
     var newChecklistText by remember { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() }
     // PIN/biometrik ulang WAJIB sebelum konten note terkunci dirender — sebelumnya TIDAK ADA
     // gerbang apapun di sini: isLocked cuma dipakai utk MASKING title/content di list (NoteCard,
     // CalendarScreen), tapi begitu note di-tap, layar ini langsung render isi asli tanpa syarat.
@@ -89,6 +90,7 @@ fun NoteEditorScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Catatan") },
@@ -102,7 +104,16 @@ fun NoteEditorScreen(
                     IconButton(onClick = { showReminderPicker = true }) {
                         Icon(if (note.reminderAt != null) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone, "Pengingat")
                     }
-                    IconButton(onClick = { note = note.copy(isLocked = !note.isLocked) }) {
+                    IconButton(onClick = {
+                        val newLocked = !note.isLocked
+                        note = note.copy(isLocked = newLocked)
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = if (newLocked) "Catatan dikunci" else "Catatan tidak lagi dikunci",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }) {
                         Icon(if (note.isLocked) Icons.Default.Lock else Icons.Default.LockOpen, "Kunci")
                     }
                 }
@@ -195,8 +206,29 @@ fun NoteEditorScreen(
     if (showReminderPicker) {
         ReminderPickerSheet(
             initial = note.reminderAt,
-            onClear = { note = note.copy(reminderAt = null); showReminderPicker = false },
-            onConfirm = { millis -> note = note.copy(reminderAt = millis); showReminderPicker = false },
+            onClear = {
+                val hadReminder = note.reminderAt != null
+                note = note.copy(reminderAt = null)
+                showReminderPicker = false
+                if (hadReminder) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "Pengingat dihapus dari catatan ini",
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+            },
+            onConfirm = { millis ->
+                note = note.copy(reminderAt = millis)
+                showReminderPicker = false
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Pengingat diatur — aktif setelah catatan disimpan",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            },
             onDismiss = { showReminderPicker = false }
         )
     }

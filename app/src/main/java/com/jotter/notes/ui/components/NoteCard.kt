@@ -1,11 +1,8 @@
 package com.jotter.notes.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -15,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jotter.notes.data.Note
@@ -76,19 +74,23 @@ fun NoteCard(
 
 @Composable
 private fun NoteCardContent(note: Note, onTap: () -> Unit) {
-    val borderColor = noteColorFor(note.colorIndex)
-    Column(
+    val accentColor = noteColorFor(note.colorIndex)
+    // P2.12 color/border treatment: swap uniform 1.5dp border ring + small header dot for a
+    // left accent bar + subtle background tint (14% lerp toward the note's color). Closer to
+    // the original ColorNote-style bold per-note color signature from the spec than a plain
+    // outline was - the color is now the card's dominant visual identity, not an afterthought.
+    val cardBackground = lerp(JotterSurface, accentColor, 0.14f)
+    Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
             .clip(RoundedCornerShape(16.dp))
-            .background(JotterSurface)
-            .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(16.dp))
+            .background(cardBackground)
             .clickable(onClick = onTap)
-            .padding(14.dp)
     ) {
+        Box(Modifier.width(4.dp).fillMaxHeight().background(accentColor))
+        Column(modifier = Modifier.weight(1f).padding(14.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(10.dp).clip(CircleShape).background(borderColor))
-            Spacer(Modifier.width(6.dp))
             if (note.isLocked) Icon(Icons.Default.Lock, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
             Spacer(Modifier.weight(1f))
             note.reminderAt?.let { reminderAt ->
@@ -130,6 +132,7 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit) {
                 }
             }
             else -> Text(note.content, maxLines = 4, overflow = TextOverflow.Ellipsis, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+        }
         }
     }
 }

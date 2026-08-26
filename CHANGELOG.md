@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v2_Batch25] - 2026-08-26
+### Changed
+- NoteCard.kt: replace uniform border + header dot with left accent-color bar (4dp) + 14% background tint (lerp) - stronger per-note color identity matching original ColorNote-style spec (P2.12 color/border treatment)
+
 ## [v2_Batch24] - 2026-08-26
 ### Changed
 - NoteCard.kt: apply titleMedium/bodySmall typography tokens (P2.10) to title/content/checklist text; card padding 12dp->14dp, header spacing 6dp->8dp, checklist item spacing added (P2.11 spacing/proportion)

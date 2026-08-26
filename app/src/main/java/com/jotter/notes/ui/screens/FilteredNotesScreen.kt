@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jotter.notes.data.Note
 import com.jotter.notes.ui.components.NoteCard
 import com.jotter.notes.viewmodel.NotesViewModel
 
@@ -27,6 +28,7 @@ fun FilteredNotesScreen(
 ) {
     val isArchive = mode == FilteredMode.ARCHIVE
     val notes by (if (isArchive) viewModel.archivedNotes else viewModel.trashedNotes).collectAsState()
+    var pendingPermanentDelete by remember { mutableStateOf<Note?>(null) }
 
     Scaffold(
         topBar = {
@@ -51,10 +53,33 @@ fun FilteredNotesScreen(
                         deleteLabel = if (isArchive) "Hapus" else "Hapus Permanen",
                         onTap = { onOpenNote(note.id) },
                         onArchive = { if (isArchive) viewModel.unarchiveNote(note.id) else viewModel.restoreNote(note.id) },
-                        onDelete = { if (isArchive) viewModel.trashNote(note.id) else viewModel.permanentDelete(note.id) }
+                        onDelete = { if (isArchive) viewModel.trashNote(note.id) else pendingPermanentDelete = note }
                     )
                 }
             }
         }
+    }
+
+    // Hapus permanen (Sampah) tidak bisa dibatalkan — WAJIB konfirmasi eksplisit dulu, tidak
+    // boleh langsung jalan dari gesture swipe. Judul note terkunci tetap disamarkan di sini,
+    // konsisten dgn masking di NoteCard/CalendarScreen (tidak membocorkan isi lewat dialog).
+    pendingPermanentDelete?.let { note ->
+        AlertDialog(
+            onDismissRequest = { pendingPermanentDelete = null },
+            title = { Text("Hapus Permanen?") },
+            text = {
+                val displayTitle = if (note.isLocked) "Catatan Terkunci" else note.title.ifBlank { "Catatan tanpa judul" }
+                Text("\"$displayTitle\" akan dihapus permanen dan tidak bisa dipulihkan lagi.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.permanentDelete(note.id)
+                    pendingPermanentDelete = null
+                }) { Text("Hapus Permanen", color = Color(0xFFFF3B30)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingPermanentDelete = null }) { Text("Batal") }
+            }
+        )
     }
 }

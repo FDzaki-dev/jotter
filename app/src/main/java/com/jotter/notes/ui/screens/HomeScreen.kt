@@ -27,6 +27,7 @@ fun HomeScreen(
 ) {
     val notes by viewModel.activeNotes.collectAsState()
     val viewMode by viewModel.viewMode.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
     var showSortSheet by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -50,17 +51,30 @@ fun HomeScreen(
     ) { padding ->
         Column(Modifier.padding(padding)) {
             OutlinedTextField(
-                value = "",
+                value = searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },
                 placeholder = { Text("Cari catatan") },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.setSearchQuery("") }) {
+                            Icon(Icons.Default.Close, "Hapus pencarian")
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 singleLine = true
             )
 
             if (notes.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                    Text("Belum ada catatan", color = androidx.compose.ui.graphics.Color.Gray)
+                    Text(
+                        if (searchQuery.isNotEmpty()) "Tidak ada catatan yang cocok dengan \"$searchQuery\""
+                        else "Belum ada catatan · ketuk + di kanan atas untuk membuat catatan baru",
+                        color = androidx.compose.ui.graphics.Color.Gray,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 32.dp)
+                    )
                 }
             } else if (viewMode == ViewMode.GRID) {
                 LazyVerticalGrid(

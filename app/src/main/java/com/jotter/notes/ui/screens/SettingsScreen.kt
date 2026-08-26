@@ -58,8 +58,8 @@ fun SettingsScreen(
                             viewModel.refresh()
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Kunci PIN dinonaktifkan",
-                                    duration = SnackbarDuration.Short
+                                    message = "Kunci PIN dinonaktifkan. Kalau ada catatan yang masih terkunci, atur PIN baru lagi untuk membukanya.",
+                                    duration = SnackbarDuration.Long
                                 )
                             }
                         }

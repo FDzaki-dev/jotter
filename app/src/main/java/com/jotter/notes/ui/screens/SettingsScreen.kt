@@ -17,6 +17,7 @@ import com.jotter.notes.auth.AuthManager
 import com.jotter.notes.ui.components.UpdateDialog
 import com.jotter.notes.viewmodel.SettingsViewModel
 import com.jotter.notes.viewmodel.UpdaterUiState
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +32,8 @@ fun SettingsScreen(
     val isLockEnabled by viewModel.isLockEnabled.collectAsState()
     val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsState()
     val updaterState by viewModel.updaterState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val currentVersionName = remember {
         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }
             .getOrNull() ?: "—"
@@ -38,14 +41,28 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) { viewModel.refresh() }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Pengaturan") }) }) { padding ->
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Pengaturan") }) },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
         Column(Modifier.padding(padding).fillMaxSize()) {
             Text("KEAMANAN", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.labelSmall)
             ListItem(
                 headlineContent = { Text("Kunci Aplikasi (PIN)") },
                 trailingContent = {
                     Switch(checked = isLockEnabled, onCheckedChange = { v ->
-                        if (v) onOpenLockSetup() else { auth.clearPin(); viewModel.refresh() }
+                        if (v) {
+                            onOpenLockSetup()
+                        } else {
+                            auth.clearPin()
+                            viewModel.refresh()
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Kunci PIN dinonaktifkan",
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }
                     })
                 }
             )
@@ -54,7 +71,33 @@ fun SettingsScreen(
                     headlineContent = { Text("Gunakan Biometrik") },
                     trailingContent = {
                         Switch(checked = isBiometricEnabled, onCheckedChange = { v ->
-                            if (!v || auth.canUseBiometrics()) viewModel.setBiometricEnabled(v)
+                            if (v) {
+                                val unavailableReason = auth.biometricUnavailableReason()
+                                if (unavailableReason == null) {
+                                    viewModel.setBiometricEnabled(true)
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Biometrik diaktifkan",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                } else {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = unavailableReason,
+                                            duration = SnackbarDuration.Long
+                                        )
+                                    }
+                                }
+                            } else {
+                                viewModel.setBiometricEnabled(false)
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "Biometrik dinonaktifkan",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
                         })
                     }
                 )

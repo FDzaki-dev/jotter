@@ -58,6 +58,27 @@ class AuthManager(context: Context) {
             BiometricManager.BIOMETRIC_SUCCESS
     }
 
+    /**
+     * Sama seperti [canUseBiometrics] tapi dengan alasan yang jelas kalau tidak bisa dipakai —
+     * dipakai Settings supaya toggle "Gunakan Biometrik" gagal dengan pesan, bukan senyap
+     * (Audit Medium #9). null berarti biometrik tersedia.
+     */
+    fun biometricUnavailableReason(): String? {
+        val manager = BiometricManager.from(appContext)
+        return when (manager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
+            BiometricManager.BIOMETRIC_SUCCESS -> null
+            BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE ->
+                "Perangkat ini tidak punya sensor sidik jari/wajah"
+            BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE ->
+                "Sensor biometrik sedang tidak bisa dipakai, coba lagi nanti"
+            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED ->
+                "Belum ada sidik jari/wajah terdaftar — atur dulu di Pengaturan sistem HP"
+            BiometricManager.BIOMETRIC_ERROR_SECURITY_UPDATE_REQUIRED ->
+                "Perlu pembaruan keamanan sistem dulu untuk pakai biometrik"
+            else -> "Biometrik tidak tersedia di perangkat ini"
+        }
+    }
+
     suspend fun authenticateBiometric(activity: FragmentActivity): Boolean = suspendCancellableCoroutine { cont ->
         val executor = ContextCompat.getMainExecutor(activity)
         val callback = object : BiometricPrompt.AuthenticationCallback() {

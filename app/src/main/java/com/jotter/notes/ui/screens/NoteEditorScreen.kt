@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -99,7 +101,13 @@ fun NoteEditorScreen(
                 },
                 actions = {
                     IconButton(onClick = { showColorPicker = true }) {
-                        Box(Modifier.size(20.dp).clip(CircleShape).background(noteColorFor(note.colorIndex)))
+                        Box(
+                            Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .background(noteColorFor(note.colorIndex))
+                                .semantics { contentDescription = "Pilih warna catatan" }
+                        )
                     }
                     IconButton(onClick = { showReminderPicker = true }) {
                         Icon(if (note.reminderAt != null) Icons.Default.NotificationsActive else Icons.Default.NotificationsNone, "Pengingat")

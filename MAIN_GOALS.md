@@ -14,6 +14,7 @@ Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfir
 | Lock — PIN | ❓ | Ditulis ulang (EncryptedSharedPreferences), status ✅ versi Flutter TIDAK carry over otomatis |
 | Lock — Biometric | ❓ | Ditulis ulang pakai BiometricPrompt asli (bukan lewat plugin) - secara arsitektur harusnya lebih reliable, tapi tetap belum dites |
 | Grid/List toggle | ❓ | Belum dites |
+| In-app updater (cek/unduh/pasang) | ❓ | Kode lengkap end-to-end (infra Batch8 → logic Batch9 → UI Batch10), belum pernah dites di HP |
 
 ## UI/UX (iOS template, versi Compose)
 | Goal | Status | Catatan |

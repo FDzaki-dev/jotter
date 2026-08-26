@@ -1,5 +1,6 @@
 package com.jotter.notes.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -10,9 +11,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jotter.notes.auth.AuthManager
+import com.jotter.notes.ui.components.UpdateDialog
 import com.jotter.notes.viewmodel.SettingsViewModel
+import com.jotter.notes.viewmodel.UpdaterUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +30,11 @@ fun SettingsScreen(
     val auth = remember { AuthManager(context) }
     val isLockEnabled by viewModel.isLockEnabled.collectAsState()
     val isBiometricEnabled by viewModel.isBiometricEnabled.collectAsState()
+    val updaterState by viewModel.updaterState.collectAsState()
+    val currentVersionName = remember {
+        runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }
+            .getOrNull() ?: "—"
+    }
 
     LaunchedEffect(Unit) { viewModel.refresh() }
 
@@ -65,6 +74,21 @@ fun SettingsScreen(
                 modifier = Modifier.clickable(onClick = onOpenTrash)
             )
 
+            Text("PEMBARUAN APLIKASI", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.labelSmall)
+            ListItem(
+                headlineContent = { Text("Cek Pembaruan") },
+                supportingContent = { Text("Versi terpasang: $currentVersionName") },
+                leadingContent = { Icon(Icons.Default.Refresh, null) },
+                trailingContent = {
+                    if (updaterState is UpdaterUiState.Checking) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Icon(Icons.Default.ChevronRight, null)
+                    }
+                },
+                modifier = Modifier.clickable(onClick = viewModel::checkForUpdate)
+            )
+
             Spacer(Modifier.weight(1f))
             Text(
                 "Jotter v2.0 (Native Kotlin) · 100% offline · Log crash tersimpan di Documents/Jotter/logs",
@@ -74,4 +98,20 @@ fun SettingsScreen(
             )
         }
     }
+
+    UpdateDialog(
+        state = updaterState,
+        onDismiss = viewModel::dismissUpdaterDialog,
+        onStartDownload = { asset, tagName -> viewModel.startDownload(asset, tagName) },
+        onInstall = { file, tagName ->
+            val apkUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            val installIntent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(apkUri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(installIntent)
+            viewModel.markInstalled(tagName)
+        }
+    )
 }

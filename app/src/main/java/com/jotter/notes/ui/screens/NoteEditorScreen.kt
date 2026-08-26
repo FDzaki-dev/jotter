@@ -48,6 +48,11 @@ fun NoteEditorScreen(
     var showColorPicker by remember { mutableStateOf(false) }
     var showReminderPicker by remember { mutableStateOf(false) }
     var newChecklistText by remember { mutableStateOf("") }
+    // PIN/biometrik ulang WAJIB sebelum konten note terkunci dirender — sebelumnya TIDAK ADA
+    // gerbang apapun di sini: isLocked cuma dipakai utk MASKING title/content di list (NoteCard,
+    // CalendarScreen), tapi begitu note di-tap, layar ini langsung render isi asli tanpa syarat.
+    // `unlocked` di-keyed ke noteId biar reset tiap kali buka note (locked) yang beda.
+    var unlocked by remember(noteId) { mutableStateOf(false) }
 
     LaunchedEffect(noteId) {
         if (noteId != null) {
@@ -68,10 +73,18 @@ fun NoteEditorScreen(
         onBack()
     }
 
-    BackHandler(enabled = true) { saveAndExit() }
+    val requiresUnlock = !isNew && note.isLocked
+    // Selama gerbang PIN/biometrik belum lolos, konten note tidak pernah dirender -> tidak ada
+    // yang perlu di-"save" kalau user batal (BackHandler cukup onBack() polos, bukan saveAndExit()).
+    BackHandler(enabled = true) { if (requiresUnlock && !unlocked) onBack() else saveAndExit() }
 
     if (!loaded) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+        return
+    }
+
+    if (requiresUnlock && !unlocked) {
+        LockScreen(mode = LockMode.VERIFY, onResult = { success -> if (success) unlocked = true else onBack() })
         return
     }
 

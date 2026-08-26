@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jotter.notes.data.Note
 import com.jotter.notes.ui.components.NoteCard
 import com.jotter.notes.viewmodel.NotesViewModel
+import kotlinx.coroutines.launch
 
 enum class FilteredMode { ARCHIVE, TRASH }
 
@@ -29,8 +30,24 @@ fun FilteredNotesScreen(
     val isArchive = mode == FilteredMode.ARCHIVE
     val notes by (if (isArchive) viewModel.archivedNotes else viewModel.trashedNotes).collectAsState()
     var pendingPermanentDelete by remember { mutableStateOf<Note?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // Umpan balik Snackbar utk aksi Restore/Unarchive/Hapus(→sampah) — sebelumnya senyap total.
+    // Tombol "Urungkan" hanya utk aksi reversible; hapus permanen (di bawah) sengaja TANPA undo.
+    fun showUndo(message: String, onUndo: () -> Unit) {
+        scope.launch {
+            val result = snackbarHostState.showSnackbar(
+                message = message,
+                actionLabel = "Urungkan",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) onUndo()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(if (isArchive) "Arsip" else "Sampah") },
@@ -52,8 +69,23 @@ fun FilteredNotesScreen(
                         archiveColor = if (isArchive) Color(0xFF007AFF) else Color(0xFF34C759),
                         deleteLabel = if (isArchive) "Hapus" else "Hapus Permanen",
                         onTap = { onOpenNote(note.id) },
-                        onArchive = { if (isArchive) viewModel.unarchiveNote(note.id) else viewModel.restoreNote(note.id) },
-                        onDelete = { if (isArchive) viewModel.trashNote(note.id) else pendingPermanentDelete = note }
+                        onArchive = {
+                            if (isArchive) {
+                                viewModel.unarchiveNote(note.id)
+                                showUndo("Catatan dikeluarkan dari arsip") { viewModel.archiveNote(note.id) }
+                            } else {
+                                viewModel.restoreNote(note.id)
+                                showUndo("Catatan dipulihkan") { viewModel.trashNote(note.id) }
+                            }
+                        },
+                        onDelete = {
+                            if (isArchive) {
+                                viewModel.trashNote(note.id)
+                                showUndo("Catatan dipindah ke sampah") { viewModel.restoreNote(note.id) }
+                            } else {
+                                pendingPermanentDelete = note
+                            }
+                        }
                     )
                 }
             }
@@ -75,6 +107,7 @@ fun FilteredNotesScreen(
                 TextButton(onClick = {
                     viewModel.permanentDelete(note.id)
                     pendingPermanentDelete = null
+                    scope.launch { snackbarHostState.showSnackbar("Catatan dihapus permanen", duration = SnackbarDuration.Short) }
                 }) { Text("Hapus Permanen", color = Color(0xFFFF3B30)) }
             },
             dismissButton = {

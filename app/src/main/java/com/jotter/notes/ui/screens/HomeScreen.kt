@@ -14,10 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jotter.notes.data.Note
 import com.jotter.notes.data.SortMode
 import com.jotter.notes.ui.components.NoteCard
 import com.jotter.notes.viewmodel.NotesViewModel
 import com.jotter.notes.viewmodel.ViewMode
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,9 +32,39 @@ fun HomeScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     var showSortSheet by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // Aksi Archive/Delete dari swipe sebelumnya senyap total (list berubah, tanpa umpan balik) —
+    // sekarang tiap aksi tampilkan Snackbar + tombol "Urungkan" (reversible, konsisten dgn
+    // semantik archiveNote/trashNote yang memang bukan operasi permanen).
+    fun archiveWithUndo(note: Note) {
+        viewModel.archiveNote(note.id)
+        scope.launch {
+            val result = snackbarHostState.showSnackbar(
+                message = "Catatan diarsipkan",
+                actionLabel = "Urungkan",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) viewModel.unarchiveNote(note.id)
+        }
+    }
+
+    fun deleteWithUndo(note: Note) {
+        viewModel.trashNote(note.id)
+        scope.launch {
+            val result = snackbarHostState.showSnackbar(
+                message = "Catatan dipindah ke sampah",
+                actionLabel = "Urungkan",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) viewModel.restoreNote(note.id)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             LargeTopAppBar(
                 title = { Text("Catatan") },
@@ -87,8 +119,8 @@ fun HomeScreen(
                         NoteCard(
                             note = note,
                             onTap = { onOpenNote(note.id) },
-                            onArchive = { viewModel.archiveNote(note.id) },
-                            onDelete = { viewModel.trashNote(note.id) }
+                            onArchive = { archiveWithUndo(note) },
+                            onDelete = { deleteWithUndo(note) }
                         )
                     }
                 }
@@ -98,8 +130,8 @@ fun HomeScreen(
                         NoteCard(
                             note = note,
                             onTap = { onOpenNote(note.id) },
-                            onArchive = { viewModel.archiveNote(note.id) },
-                            onDelete = { viewModel.trashNote(note.id) }
+                            onArchive = { archiveWithUndo(note) },
+                            onDelete = { deleteWithUndo(note) }
                         )
                     }
                 }

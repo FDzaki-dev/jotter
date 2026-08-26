@@ -121,7 +121,9 @@ class UpdateChecker(context: Context) {
     }
 
     companion object {
-        private const val REPO = "FDzaki-dev/jotter"
+        // Publik (bukan private lagi) — dipakai ulang SettingsScreen.kt utk shortcut manual ke
+        // halaman GitHub Releases, biar 1 sumber kebenaran (bukan hardcode string repo di 2 tempat).
+        const val REPO = "FDzaki-dev/jotter"
         private const val PREFS_NAME = "jotter_updater_prefs"
         private const val KEY_LAST_INSTALLED_TAG = "last_installed_tag"
     }

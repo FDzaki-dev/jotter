@@ -1,6 +1,7 @@
 package com.jotter.notes.ui.screens
 
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -15,6 +16,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jotter.notes.auth.AuthManager
 import com.jotter.notes.ui.components.UpdateDialog
+import com.jotter.notes.updater.UpdateChecker
 import com.jotter.notes.viewmodel.SettingsViewModel
 import com.jotter.notes.viewmodel.UpdaterUiState
 import kotlinx.coroutines.launch
@@ -130,6 +132,16 @@ fun SettingsScreen(
                     }
                 },
                 modifier = Modifier.clickable(onClick = viewModel::checkForUpdate)
+            )
+            ListItem(
+                headlineContent = { Text("Lihat Rilis di GitHub") },
+                supportingContent = { Text("Buka halaman rilis & unduh APK manual di browser") },
+                leadingContent = { Icon(Icons.Default.OpenInNew, null) },
+                trailingContent = { Icon(Icons.Default.ChevronRight, null) },
+                modifier = Modifier.clickable {
+                    val url = "https://github.com/${UpdateChecker.REPO}/releases/latest"
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                }
             )
 
             Spacer(Modifier.weight(1f))

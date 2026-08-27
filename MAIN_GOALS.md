@@ -29,3 +29,27 @@ Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfir
 1. **Back gesture** (swipe dari tepi) di layar note editor
 2. **Tombol back** (ikon panah pojok kiri) di layar note editor
 3. Baru lanjut ke fitur lain (note, checklist, warna, dst) kalau #1 dan #2 sudah beneran jalan
+
+## Referensi Kompetitor — ColorNote & Google Keep
+_Digabung permanen 2026-08-28 dari 2 file riset user (`fitur_unggulan_colornote.md` + `perbandingan_colornote_google_keep.md` — isi kedua identik, file kedua cuma tambah tabel perbandingan; digabung jadi 1 section, file asal tidak disimpan terpisah lagi)._
+
+ColorNote = acuan desain awal Jotter (warna kategori, checklist, kalender+reminder — lihat juga catatan treatment kartu warna di riwayat batch). Pilar fitur ColorNote vs status di Jotter:
+- **Warna kategori + filter** → Jotter ✅ ada (9 warna)
+- **Text note + checklist tanpa batas** → Jotter ✅ ada
+- **Kalender + reminder waktu, reminder harian, pin ke status bar** → Jotter ✅ kalender+reminder waktu ada; **pin ke status bar TIDAK ada** (belum jadi goal)
+- **Master Password + cloud backup/sync** → Jotter ✅ PIN/biometric ada; **cloud backup SENGAJA TIDAK ADA** (app 100% offline by design, lihat README)
+- **Sticky widget, auto-link teks, aplikasi ringan** → widget home-screen & auto-link **belum jadi goal**; ringan sudah otomatis dari native Kotlin
+
+### vs Google Keep (tabel riset — BUKAN backlog otomatis)
+| Fitur | ColorNote | Google Keep | Status di Jotter |
+|---|---|---|---|
+| Kalender bawaan | ✅ | ❌ (lewat Google Calendar) | ✅ ada |
+| Kunci catatan | ✅ Master Password | ❌ | ✅ PIN/biometric |
+| Label/tag kata | ❌ (cuma warna) | ✅ label + warna | ❌ cuma warna |
+| Kolaborasi real-time | ❌ | ✅ | ❌ di luar scope (offline-only) |
+| Lampiran media (foto/suara/gambar tangan) | ❌ (teks+checklist saja) | ✅ | ❌ di luar scope saat ini |
+| Lintas platform | Terbatas Android | Android/iOS/Web/Chrome | Android-only (native Kotlin) |
+| Pengingat lokasi | ❌ (waktu saja) | ✅ | ❌ waktu saja |
+| Bobot aplikasi | Sangat ringan | Lebih berat | Native Kotlin — ringan by design |
+
+**Catatan**: tabel di atas murni referensi riset. Item manapun (mis. label/tag, lampiran media, pengingat lokasi) baru resmi jadi goal kalau user eksplisit minta ditambahkan ke tabel CORE FEATURES di atas — tidak otomatis masuk pending queue.

@@ -8,10 +8,12 @@ import android.os.Build
 class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        val appVersion = runCatching { packageManager.getPackageInfo(packageName, 0).versionName }
+            .getOrNull() ?: "—"
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             try {
-                CrashLogWriter.writeThrowable(applicationContext, "Jotter", throwable, thread.name, "native")
+                CrashLogWriter.writeThrowable(applicationContext, "Jotter", appVersion, throwable, thread.name, "native")
             } catch (e: Exception) {
                 // never block the crash from propagating
             }

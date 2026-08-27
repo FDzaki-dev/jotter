@@ -22,8 +22,13 @@ android {
         applicationId = "com.jotter.notes"
         minSdk = 31
         targetSdk = 35
-        versionCode = 1
-        versionName = "2.0.0"
+        // Versioning Lock: DILARANG bump manual di sini. versionCode & versionName datang dari
+        // -PappVersionCode/-PappVersionName yang di-inject CI (release.yml) dari GITHUB_RUN_NUMBER.
+        // Fallback di bawah HANYA aktif utk build lokal (gradle :app:assembleRelease tanpa CI) -
+        // sengaja dibedakan ("-dev") supaya gak pernah ketuker sama build asli hasil CI.
+        versionCode = (findProperty("appVersionCode") as String?)?.toIntOrNull() ?: 1
+        versionName = (findProperty("appVersionName") as String?)
+            ?: "${findProperty("jotterBaseVersion") as String? ?: "2.0.0"}-dev"
     }
 
     compileOptions {

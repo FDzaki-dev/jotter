@@ -31,7 +31,7 @@ object CrashLogWriter {
         }
     }
 
-    fun writeThrowable(context: Context, appName: String, throwable: Throwable, threadName: String, source: String = "native") {
+    fun writeThrowable(context: Context, appName: String, appVersion: String, throwable: Throwable, threadName: String, source: String = "native") {
         val sw = StringWriter()
         throwable.printStackTrace(PrintWriter(sw))
         val now = System.currentTimeMillis()
@@ -39,6 +39,7 @@ object CrashLogWriter {
         val uuid = java.util.UUID.randomUUID().toString()
         val fileName = "crash_${ts}_$uuid.txt"
         val content = buildString {
+            appendLine("Version: $appVersion")
             appendLine("OS: Android ${android.os.Build.VERSION.RELEASE} (SDK ${android.os.Build.VERSION.SDK_INT})")
             appendLine("Device: ${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}")
             appendLine("Timestamp: $now")

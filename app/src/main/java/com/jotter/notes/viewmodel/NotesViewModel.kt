@@ -1,6 +1,7 @@
 package com.jotter.notes.viewmodel
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.jotter.notes.data.AppDatabase
@@ -19,9 +20,17 @@ enum class ViewMode { LIST, GRID }
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val repo = NoteRepository(AppDatabase.getInstance(application).noteDao())
+    // Reuse "ui_prefs" - file preferensi yang sama dipakai HomeScreen.kt utk swipe_hint_dismissed.
+    private val uiPrefs = application.getSharedPreferences("ui_prefs", Context.MODE_PRIVATE)
 
     val sortMode = MutableStateFlow(SortMode.MODIFIED)
-    val viewMode = MutableStateFlow(ViewMode.GRID)
+    // Sebelumnya viewMode SELALU reset ke GRID tiap app process baru (in-memory doang, 0 persist) -
+    // user pilih List, tapi begitu app di-kill/dibuka ulang balik ke Grid diam2 tanpa pemberitahuan
+    // apapun ("selalu fallback ke persegi tanpa konfirmasi", laporan user). Sekarang dibaca dari
+    // SharedPreferences saat ViewModel dibuat, ditulis balik tiap kali diubah lewat setViewMode().
+    val viewMode = MutableStateFlow(
+        if (uiPrefs.getString("view_mode", "GRID") == "LIST") ViewMode.LIST else ViewMode.GRID
+    )
     val searchQuery = MutableStateFlow("")
 
     val activeNotes: StateFlow<List<Note>> = combine(
@@ -43,7 +52,10 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun setSortMode(mode: SortMode) { sortMode.value = mode }
-    fun setViewMode(mode: ViewMode) { viewMode.value = mode }
+    fun setViewMode(mode: ViewMode) {
+        viewMode.value = mode
+        uiPrefs.edit().putString("view_mode", mode.name).apply()
+    }
     fun setSearchQuery(q: String) { searchQuery.value = q }
 
     fun saveNote(note: Note) {

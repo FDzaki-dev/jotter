@@ -2,6 +2,7 @@ package com.jotter.notes.ui.screens
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -44,6 +45,7 @@ fun HomeScreen(
     onOpenNote: (String?) -> Unit
 ) {
     val notes by viewModel.activeNotes.collectAsState()
+    val sortMode by viewModel.sortMode.collectAsState()
     val viewMode by viewModel.viewMode.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     var showSortSheet by remember { mutableStateOf(false) }
@@ -249,9 +251,18 @@ fun HomeScreen(
                     "Abjad" to SortMode.ALPHABETICAL,
                     "Warna" to SortMode.COLOR
                 ).forEach { (label, mode) ->
-                    TextButton(onClick = { viewModel.setSortMode(mode); showSortSheet = false }) {
-                        Text(label, modifier = Modifier.fillMaxWidth())
-                    }
+                    val isActive = sortMode == mode
+                    ListItem(
+                        headlineContent = { Text(label) },
+                        trailingContent = { if (isActive) Icon(Icons.Default.Check, "Aktif") },
+                        modifier = Modifier.clickable {
+                            viewModel.setSortMode(mode)
+                            showSortSheet = false
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Diurutkan berdasarkan $label", duration = SnackbarDuration.Short)
+                            }
+                        }
+                    )
                 }
             }
         }

@@ -44,7 +44,18 @@ fun CalendarScreen(viewModel: NotesViewModel = viewModel(), onOpenNote: (String)
                     Icon(Icons.Default.ChevronLeft, "Bulan sebelumnya")
                 }
                 val monthFmt = java.text.SimpleDateFormat("MMMM yyyy", java.util.Locale("id", "ID"))
-                Text(monthFmt.format(monthCursor.time), style = MaterialTheme.typography.titleLarge)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(monthFmt.format(monthCursor.time), style = MaterialTheme.typography.titleLarge)
+                    val today = Calendar.getInstance()
+                    val isCurrentMonth = monthCursor.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                        monthCursor.get(Calendar.MONTH) == today.get(Calendar.MONTH)
+                    if (!isCurrentMonth) {
+                        TextButton(
+                            onClick = { monthCursor = Calendar.getInstance(); selectedDay = Calendar.getInstance() },
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                        ) { Text("Hari Ini", style = MaterialTheme.typography.labelMedium) }
+                    }
+                }
                 IconButton(onClick = { monthCursor = (monthCursor.clone() as Calendar).apply { add(Calendar.MONTH, 1) } }) {
                     Icon(Icons.Default.ChevronRight, "Bulan berikutnya")
                 }
@@ -54,6 +65,11 @@ fun CalendarScreen(viewModel: NotesViewModel = viewModel(), onOpenNote: (String)
             val startOffset = firstOfMonth.get(Calendar.DAY_OF_WEEK) - 1
             val daysInMonth = monthCursor.getActualMaximum(Calendar.DAY_OF_MONTH)
             val cells = (0 until startOffset).map { null } + (1..daysInMonth).map { it }
+            // Padding trailing null agar SEMUA baris (termasuk baris terakhir yg gak penuh) selalu
+            // 7 elemen - weight(1f) di Row bawah bakal salah bagi lebar kalau baris terakhir cuma
+            // berisi 2-3 sel (itu penyebab "anomali circle besar" yang dilaporkan: circle utk
+            // tanggal 30-31 ke-render ~3.5x lebih lebar dari seharusnya).
+            val paddedCells = cells + List((7 - cells.size % 7) % 7) { null }
 
             Column(Modifier.padding(horizontal = 12.dp)) {
                 listOf("S", "S", "R", "K", "J", "S", "M").let {
@@ -61,7 +77,7 @@ fun CalendarScreen(viewModel: NotesViewModel = viewModel(), onOpenNote: (String)
                         it.forEach { d -> Text(d, Modifier.weight(1f), textAlign = TextAlign.Center, color = Color.Gray) }
                     }
                 }
-                cells.chunked(7).forEach { week ->
+                paddedCells.chunked(7).forEach { week ->
                     Row(Modifier.fillMaxWidth()) {
                         week.forEach { day ->
                             Box(Modifier.weight(1f).aspectRatio(1f).padding(4.dp), contentAlignment = Alignment.Center) {

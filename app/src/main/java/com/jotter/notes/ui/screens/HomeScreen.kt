@@ -19,12 +19,23 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jotter.notes.backup.BackupFileInfo
+import com.jotter.notes.backup.BackupManager
+import com.jotter.notes.backup.RestoreResult
 import com.jotter.notes.data.Note
 import com.jotter.notes.data.SortMode
 import com.jotter.notes.ui.components.NoteCard
 import com.jotter.notes.viewmodel.NotesViewModel
 import com.jotter.notes.viewmodel.ViewMode
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+/** Sengaja top-level (bukan `remember`/ViewModel) — deteksi restore cuma boleh jalan SEKALI per
+ * proses app (bukan tiap kali HomeScreen di-compose ulang pas navigasi balik dari layar lain),
+ * biar gak nge-nag user berulang kali kalau mereka pilih "Nanti" tapi belum sempat bikin catatan
+ * baru. Reset otomatis tiap proses app baru (cold start) — itu memang semantik yang diinginkan. */
+private var restoreCheckDoneThisProcess = false
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +57,20 @@ fun HomeScreen(
     val context = LocalContext.current
     val uiPrefs = remember { context.getSharedPreferences("ui_prefs", Context.MODE_PRIVATE) }
     var showSwipeHint by remember { mutableStateOf(!uiPrefs.getBoolean("swipe_hint_dismissed", false)) }
+
+    // Deteksi kandidat "app baru di-uninstall+instal ulang / DB corrupt" (Batch39/40 slice 2/2)
+    // — Documents/<App>/backup TIDAK ikut kehapus pas uninstall (di luar sandbox app), beda dari
+    // Room DB yang lenyap total. isEmpty() cek TOTAL notes tanpa filter (bukan activeNotes yg
+    // bisa 0 padahal ada notes lain di arsip/sampah - itu false-positive).
+    var restoreSuggestion by remember { mutableStateOf<BackupFileInfo?>(null) }
+    LaunchedEffect(Unit) {
+        if (restoreCheckDoneThisProcess) return@LaunchedEffect
+        restoreCheckDoneThisProcess = true
+        if (viewModel.isEmpty()) {
+            val info = withContext(Dispatchers.IO) { BackupManager.findLatestBackup(context, "Jotter") }
+            if (info != null) restoreSuggestion = info
+        }
+    }
 
     // Aksi Archive/Delete dari swipe sebelumnya senyap total (list berubah, tanpa umpan balik) —
     // sekarang tiap aksi tampilkan Snackbar + tombol "Urungkan" (reversible, konsisten dgn
@@ -177,6 +202,40 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    restoreSuggestion?.let { info ->
+        AlertDialog(
+            onDismissRequest = { restoreSuggestion = null },
+            title = { Text("Pulihkan Catatan?") },
+            text = {
+                val dateStr = java.text.SimpleDateFormat("d MMM yyyy, HH:mm", java.util.Locale("id", "ID"))
+                    .format(java.util.Date(info.dateAddedSeconds * 1000L))
+                Text("Jotter tidak menemukan catatan tersimpan di perangkat ini, tapi ada file backup dari $dateStr. Ini bisa terjadi kalau aplikasi baru saja dipasang ulang. Mau pulihkan catatan dari backup itu?")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val uri = info.uri
+                    restoreSuggestion = null
+                    scope.launch {
+                        val result = BackupManager.restore(context, uri)
+                        val message = when (result) {
+                            is RestoreResult.Success -> {
+                                val base = "Berhasil memulihkan ${result.restoredCount} catatan"
+                                if (result.lockedPlaceholderCount > 0) {
+                                    "$base (${result.lockedPlaceholderCount} di antaranya catatan terkunci — isinya placeholder, bukan konten asli)"
+                                } else base
+                            }
+                            is RestoreResult.Error -> "Pulihkan gagal: ${result.message}"
+                        }
+                        snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
+                    }
+                }) { Text("Pulihkan") }
+            },
+            dismissButton = {
+                TextButton(onClick = { restoreSuggestion = null }) { Text("Nanti") }
+            }
+        )
     }
 
     if (showSortSheet) {

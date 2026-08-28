@@ -38,4 +38,8 @@ class NoteRepository(private val dao: NoteDao) {
     suspend fun permanentDelete(id: String) = dao.permanentDelete(id)
     suspend fun setLocked(id: String, value: Boolean) = dao.setLocked(id, value)
     suspend fun getById(id: String): Note? = dao.getById(id)
+    /** Total SEMUA notes tanpa filter (termasuk arsip/sampah) — beda dari observeActive() yang
+     * cuma notes aktif. Dipakai HomeScreen deteksi "DB benar2 kosong" (bukan "tab aktif kosong
+     * krn semua diarsipkan", itu false-positive kalau pakai activeNotes.isEmpty()). */
+    suspend fun count(): Int = dao.count()
 }

@@ -68,4 +68,7 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun setLocked(id: String, value: Boolean) = viewModelScope.launch { repo.setLocked(id, value) }
     suspend fun getById(id: String): Note? = repo.getById(id)
+    /** Dipakai HomeScreen sekali per app-open utk deteksi kandidat "app baru di-uninstall+instal
+     * ulang / DB corrupt" (lihat backup/BackupManager.kt) — 0 filter, beda dari activeNotes. */
+    suspend fun isEmpty(): Boolean = repo.count() == 0
 }

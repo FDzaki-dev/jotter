@@ -3,6 +3,8 @@ package com.jotter.notes.ui.screens
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -97,7 +99,12 @@ fun SettingsScreen(
         topBar = { TopAppBar(title = { Text("Pengaturan") }) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        Column(Modifier.padding(padding).fillMaxSize()) {
+        Column(
+            Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             Text("KEAMANAN", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.labelSmall)
             ListItem(
                 headlineContent = { Text("Kunci Aplikasi (PIN)") },
@@ -249,7 +256,7 @@ fun SettingsScreen(
                 }
             )
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(24.dp))
             Text(
                 "Jotter · 100% offline, semua catatan tersimpan di perangkat ini",
                 modifier = Modifier.padding(16.dp).fillMaxWidth(),

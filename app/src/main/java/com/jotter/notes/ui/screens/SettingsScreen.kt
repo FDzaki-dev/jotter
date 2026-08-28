@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -57,6 +58,15 @@ fun SettingsScreen(
     var isBackingUp by remember { mutableStateOf(false) }
     var isRestoring by remember { mutableStateOf(false) }
     var pendingRestore by remember { mutableStateOf<BackupFileInfo?>(null) }
+    // [Batch46] Guard aksi konsekuensial dari touch gak sengaja (senggol dikit → langsung jalan,
+    // 0 konfirmasi). 3 titik ini SEBELUMNYA eksekusi langsung di dalam clickable/onCheckedChange:
+    // matikan PIN (destroy kredensial), Backup Data (I/O + overwrite file lama), restore manual
+    // SAF (bisa nimpa catatan ID sama — sama beratnya dgn restore auto-detect yg SUDAH pakai
+    // pendingRestore di bawah). Pola: clickable/toggle cuma SET state ini, eksekusi asli pindah
+    // ke confirmButton AlertDialog terpisah di bawah root Column.
+    var pendingDisablePin by remember { mutableStateOf(false) }
+    var showBackupConfirm by remember { mutableStateOf(false) }
+    var pendingManualRestoreUri by remember { mutableStateOf<Uri?>(null) }
 
     // Sama persis BackupManager.restore() yang dipakai dialog konfirmasi di bawah — diekstrak
     // jadi 1 fungsi krn sekarang ada 2 entry point (auto-detect findLatestBackup() DAN SAF picker
@@ -84,12 +94,7 @@ fun SettingsScreen(
     // langsung dibaca sekali saat itu juga (bukan disimpan buat dipakai lagi nanti).
     val restoreFilePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
-            isRestoring = true
-            scope.launch {
-                val message = performRestore(uri)
-                isRestoring = false
-                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
-            }
+            pendingManualRestoreUri = uri
         }
     }
 
@@ -113,14 +118,7 @@ fun SettingsScreen(
                         if (v) {
                             onOpenLockSetup()
                         } else {
-                            auth.clearPin()
-                            viewModel.refresh()
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = "Kunci PIN dinonaktifkan. Kalau ada catatan yang masih terkunci, atur PIN baru lagi untuk membukanya.",
-                                    duration = SnackbarDuration.Long
-                                )
-                            }
+                            pendingDisablePin = true
                         }
                     })
                 }
@@ -186,16 +184,7 @@ fun SettingsScreen(
                     else Icon(Icons.Default.ChevronRight, null)
                 },
                 modifier = Modifier.clickable(enabled = !isBackingUp) {
-                    isBackingUp = true
-                    scope.launch {
-                        val result = BackupManager.backup(context, "Jotter")
-                        isBackingUp = false
-                        val message = when (result) {
-                            is BackupResult.Success -> "Backup berhasil — ${result.noteCount} catatan disimpan (${result.fileName})"
-                            is BackupResult.Error -> "Backup gagal: ${result.message}"
-                        }
-                        snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
-                    }
+                    showBackupConfirm = true
                 }
             )
             ListItem(
@@ -289,6 +278,78 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { pendingRestore = null }) { Text("Batal") }
+            }
+        )
+    }
+
+    if (pendingDisablePin) {
+        AlertDialog(
+            onDismissRequest = { pendingDisablePin = false },
+            title = { Text("Matikan Kunci PIN?") },
+            text = { Text("Aplikasi tidak lagi meminta PIN/biometrik saat dibuka. Catatan yang masih terkunci butuh PIN baru lagi nanti untuk dibuka. Lanjutkan?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingDisablePin = false
+                    auth.clearPin()
+                    viewModel.refresh()
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "Kunci PIN dinonaktifkan. Kalau ada catatan yang masih terkunci, atur PIN baru lagi untuk membukanya.",
+                            duration = SnackbarDuration.Long
+                        )
+                    }
+                }) { Text("Matikan", color = Color(0xFFFF3B30)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDisablePin = false }) { Text("Batal") }
+            }
+        )
+    }
+
+    if (showBackupConfirm) {
+        AlertDialog(
+            onDismissRequest = { showBackupConfirm = false },
+            title = { Text("Backup Sekarang?") },
+            text = { Text("Simpan salinan semua catatan ke Documents/Jotter/backup. Catatan terkunci disimpan tanpa isi asli, demi keamanan. Lanjutkan?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showBackupConfirm = false
+                    isBackingUp = true
+                    scope.launch {
+                        val result = BackupManager.backup(context, "Jotter")
+                        isBackingUp = false
+                        val message = when (result) {
+                            is BackupResult.Success -> "Backup berhasil — ${result.noteCount} catatan disimpan (${result.fileName})"
+                            is BackupResult.Error -> "Backup gagal: ${result.message}"
+                        }
+                        snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
+                    }
+                }) { Text("Backup") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBackupConfirm = false }) { Text("Batal") }
+            }
+        )
+    }
+
+    pendingManualRestoreUri?.let { uri ->
+        AlertDialog(
+            onDismissRequest = { pendingManualRestoreUri = null },
+            title = { Text("Pulihkan dari File Ini?") },
+            text = { Text("Catatan dari file yang dipilih akan ditambahkan ke catatan yang ada sekarang (catatan dengan ID sama akan ditimpa versi backup). Lanjutkan?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    pendingManualRestoreUri = null
+                    isRestoring = true
+                    scope.launch {
+                        val message = performRestore(uri)
+                        isRestoring = false
+                        snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
+                    }
+                }) { Text("Pulihkan") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingManualRestoreUri = null }) { Text("Batal") }
             }
         )
     }

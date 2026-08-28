@@ -204,7 +204,7 @@ fun SettingsScreen(
                         val info = withContext(Dispatchers.IO) { BackupManager.findLatestBackup(context, "Jotter") }
                         if (info == null) {
                             snackbarHostState.showSnackbar(
-                                message = "Belum ada file backup ditemukan di Documents/Jotter/backup",
+                                message = "Tidak ketemu otomatis di Documents/Jotter/backup. Kalau kamu yakin sudah pernah backup, coba \"Pilih File Backup Manual\" di bawah ini.",
                                 duration = SnackbarDuration.Long
                             )
                         } else {

@@ -13,6 +13,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jotter.notes.auth.AuthManager
 import com.jotter.notes.backup.BackupFileInfo
@@ -53,6 +55,41 @@ fun SettingsScreen(
     var isBackingUp by remember { mutableStateOf(false) }
     var isRestoring by remember { mutableStateOf(false) }
     var pendingRestore by remember { mutableStateOf<BackupFileInfo?>(null) }
+
+    // Sama persis BackupManager.restore() yang dipakai dialog konfirmasi di bawah — diekstrak
+    // jadi 1 fungsi krn sekarang ada 2 entry point (auto-detect findLatestBackup() DAN SAF picker
+    // manual di bawah), biar pesan Snackbar hasil restore konsisten & gak diketik 2x.
+    suspend fun performRestore(uri: Uri): String {
+        val result = BackupManager.restore(context, uri)
+        return when (result) {
+            is RestoreResult.Success -> {
+                val base = "Berhasil memulihkan ${result.restoredCount} catatan"
+                if (result.lockedPlaceholderCount > 0) {
+                    "$base (${result.lockedPlaceholderCount} di antaranya catatan terkunci — isinya placeholder, bukan konten asli, sesuai desain keamanan backup)"
+                } else base
+            }
+            is RestoreResult.Error -> "Pulihkan gagal: ${result.message}"
+        }
+    }
+
+    // Fallback SAF (Storage Access Framework) — risiko dicatat eksplisit sejak Batch39: query
+    // MediaStore (findLatestBackup) ada di area abu2 scoped storage API 29+ pasca app
+    // uninstall+instal-ulang, TIDAK 100% pasti selalu bisa nemu balik file yang app sendiri buat
+    // di sesi SEBELUMNYA di semua versi Android/OEM. ACTION_OPEN_DOCUMENT SELALU jalan tanpa
+    // permission tambahan apapun (user pilih file lewat picker bawaan OS, dapat izin baca
+    // sementara ke URI itu otomatis) — 1 tap ekstra dari user, tapi 0 ketergantungan ke
+    // kemungkinan query MediaStore gagal. TIDAK butuh takePersistableUriPermission krn file
+    // langsung dibaca sekali saat itu juga (bukan disimpan buat dipakai lagi nanti).
+    val restoreFilePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            isRestoring = true
+            scope.launch {
+                val message = performRestore(uri)
+                isRestoring = false
+                snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
+            }
+        }
+    }
 
     LaunchedEffect(Unit) { viewModel.refresh() }
 
@@ -177,6 +214,16 @@ fun SettingsScreen(
                 }
             )
 
+            ListItem(
+                headlineContent = { Text("Pilih File Backup Manual") },
+                supportingContent = { Text("Kalau deteksi otomatis di atas tidak menemukan file, pilih manual lewat file picker") },
+                leadingContent = { Icon(Icons.Default.FolderOpen, null) },
+                trailingContent = { Icon(Icons.Default.ChevronRight, null) },
+                modifier = Modifier.clickable(enabled = !isRestoring) {
+                    restoreFilePicker.launch(arrayOf("application/json"))
+                }
+            )
+
             Text("PEMBARUAN APLIKASI", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.labelSmall)
             ListItem(
                 headlineContent = { Text("Cek Pembaruan") },
@@ -227,17 +274,8 @@ fun SettingsScreen(
                     pendingRestore = null
                     isRestoring = true
                     scope.launch {
-                        val result = BackupManager.restore(context, uri)
+                        val message = performRestore(uri)
                         isRestoring = false
-                        val message = when (result) {
-                            is RestoreResult.Success -> {
-                                val base = "Berhasil memulihkan ${result.restoredCount} catatan"
-                                if (result.lockedPlaceholderCount > 0) {
-                                    "$base (${result.lockedPlaceholderCount} di antaranya catatan terkunci — isinya placeholder, bukan konten asli, sesuai desain keamanan backup)"
-                                } else base
-                            }
-                            is RestoreResult.Error -> "Pulihkan gagal: ${result.message}"
-                        }
                         snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
                     }
                 }) { Text("Pulihkan") }

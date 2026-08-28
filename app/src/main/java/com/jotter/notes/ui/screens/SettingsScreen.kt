@@ -156,6 +156,7 @@ fun SettingsScreen(
 
     UpdateDialog(
         state = updaterState,
+        installedVersionName = currentVersionName,
         onDismiss = viewModel::dismissUpdaterDialog,
         onStartDownload = { asset, tagName -> viewModel.startDownload(asset, tagName) },
         onInstall = { file, tagName ->

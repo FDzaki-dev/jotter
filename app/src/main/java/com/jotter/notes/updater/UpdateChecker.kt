@@ -24,7 +24,8 @@ data class ReleaseAsset(
 /** Info rilis terbaru dari GitHub Releases API (`/releases/latest`). */
 data class ReleaseInfo(
     val tagName: String,
-    val assets: List<ReleaseAsset>
+    val assets: List<ReleaseAsset>,
+    val body: String
 )
 
 sealed class UpdateCheckResult {
@@ -81,7 +82,7 @@ class UpdateChecker(context: Context) {
                         }
                     }
                 }
-                val release = ReleaseInfo(tagName, assets)
+                val release = ReleaseInfo(tagName, assets, json.optString("body", ""))
 
                 val lastInstalledTag = prefs.getString(KEY_LAST_INSTALLED_TAG, null)
                 if (lastInstalledTag != null && lastInstalledTag == tagName) {

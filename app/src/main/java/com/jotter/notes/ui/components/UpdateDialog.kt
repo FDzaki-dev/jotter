@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jotter.notes.updater.ReleaseAsset
 import com.jotter.notes.viewmodel.UpdaterUiState
@@ -24,6 +27,7 @@ import java.io.File
 @Composable
 fun UpdateDialog(
     state: UpdaterUiState,
+    installedVersionName: String,
     onDismiss: () -> Unit,
     onStartDownload: (asset: ReleaseAsset, tagName: String) -> Unit,
     onInstall: (file: File, tagName: String) -> Unit
@@ -32,7 +36,27 @@ fun UpdateDialog(
         is UpdaterUiState.Available -> AlertDialog(
             onDismissRequest = onDismiss,
             title = { Text("Pembaruan Tersedia") },
-            text = { Text("Versi baru (${state.release.tagName}) siap diunduh, ukuran ${formatSize(state.asset.size)}.") },
+            text = {
+                Column(Modifier.fillMaxWidth()) {
+                    // Komparasi versi (P.next: sebelumnya cuma nampilin tag mentah rilis baru,
+                    // 0 info versi yang lagi dipakai user - gak ada dasar pembanding sama sekali).
+                    Text(
+                        "Build #${buildNumberOf(installedVersionName) ?: installedVersionName}  →  Build #${buildNumberOf(state.release.tagName) ?: state.release.tagName}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        "Terpasang: $installedVersionName · Ukuran unduhan: ${formatSize(state.asset.size)}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                    // Ringkasan (bukan "lihat log selengkapnya") - diambil dari body rilis GitHub
+                    // yang MEMANG sudah ditulis per-rilis sejak release.yml Batch18 (commit message
+                    // + build info), dipotong SEBELUM bagian daftar APK/changelog otomatis biar
+                    // yang tampil di dialog cuma bagian "apa yang berubah", bukan detail teknis file.
+                    Text("Yang baru:", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                    Text(summaryOf(state.release.body), style = MaterialTheme.typography.bodyMedium)
+                }
+            },
             confirmButton = {
                 TextButton(onClick = { onStartDownload(state.asset, state.release.tagName) }) { Text("Unduh & Pasang") }
             },
@@ -99,6 +123,25 @@ fun UpdateDialog(
 
         UpdaterUiState.Idle, UpdaterUiState.Checking -> Unit
     }
+}
+
+/** Ekstrak angka build (run_number) dari format `2.0.0-build54` (versionName terpasang) ATAU
+ * `build-20260828-56` (tag_name rilis GitHub) - dua pola beda yg sama2 diakhiri `-<digit>`.
+ * Null kalau formatnya gak dikenali (fallback: tampilkan string aslinya apa adanya). */
+private fun buildNumberOf(versionOrTag: String): String? =
+    Regex("-(\\d+)$").find(versionOrTag)?.groupValues?.get(1)
+
+/** Ambil bagian body rilis SEBELUM heading "### APK per arsitektur" (lihat template body di
+ * release.yml Batch18/19) - itu berisi commit message + build info, cukup buat "apa yang
+ * berubah" TANPA ikut nyeret daftar APK & changelog otomatis GitHub yang lebih teknis/panjang.
+ * Kalau markernya gak ketemu (rilis lama sebelum Batch18, atau format body berubah di masa
+ * depan), fallback tampilkan body apa adanya (dipotong) drpd kosong total. */
+private fun summaryOf(body: String): String {
+    val marker = "### APK per arsitektur"
+    val idx = body.indexOf(marker)
+    val raw = if (idx >= 0) body.substring(0, idx) else body
+    val cleaned = raw.trim()
+    return cleaned.ifBlank { "Tidak ada ringkasan untuk rilis ini." }
 }
 
 private fun formatSize(bytes: Long): String {

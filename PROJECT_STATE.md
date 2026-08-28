@@ -6,7 +6,20 @@
 - `Jotter` (kapital) = nama file/branding. `jotter` (kecil) = path/folder/repo/package.
 - **[INSIDEN Batch4, 2026-08-25] DILARANG KERAS pakai exclude-pattern generik (`zip -x ".*"` atau sejenisnya) saat packaging ZIP proyek ini.** Kejadian: flag itu ikut membuang `.gitattributes`, `.gitignore`, `.github/workflows/release.yml` dari ZIP rilis. Karena Termux `DAILY UPDATE` script (immutable) cuma spare folder `.git` (bukan pola dotfile lain) saat wipe-and-replace, file2 itu ikut ke-`rm -rf` dari repo lokal lalu ke-`git add -A` + push sebagai commit yang MENGHAPUS-nya dari GitHub juga — CI workflow sempat lenyap dari repo tanpa disadari sampai user ngeh. WAJIB: setiap packaging ZIP, SEMUA dotfile/dotfolder project (`.gitattributes`, `.gitignore`, `.github/`) IKUT ke dalam ZIP tanpa exclude apapun (satu2nya yang boleh diexclude, kalau ada, adalah folder `.git` VCS internal itu sendiri — bukan dotfile lain). WAJIB verifikasi isi ZIP (`unzip -l`) sebelum present ke user, cek dotfile penting ada.
 
-## [v2_Batch46] — 2026-08-28 (TERBARU)
+## [v2_Batch47] — 2026-08-28 (TERBARU)
+Lanjut sinkronisasi `MAIN_GOALS.md` (sempat kepotong krn debugging Batch42-46) — user: "straight to the point, dilarang overthinking".
+- **`MAIN_GOALS.md`** (diubah, 1 file): status disinkronkan thd bukti nyata yang udah numpuk di riwayat batch, bukan blanket "❓ belum dites" sisa v2_Batch1:
+  - **Rounded corner card**: 🔧→✅ (screenshot device asli v2_Batch5 konfirmasi eksplisit).
+  - **Kalender + reminder**, **Lock—PIN**, **Lock—Biometric**: ❓→🔧 (masing2 punya bug NYATA yang ketemu lewat device testing beneran — reminder-sheet Batch29, security-bypass kritis Batch13 — sudah difix, tinggal belum ada konfirmasi ulang eksplisit pasca-fix).
+  - **Teks & Checklist note**: tetap ❓ (gak ada bukti langsung teks/checklist murni bebas bug) tapi catatan diperkaya bukti pemakaian aktif.
+  - **Baris baru: "Backup & Restore data"** (🔧) — fitur yang lahir + didebug penuh Batch39-46, belum ada di tabel sama sekali sebelumnya.
+  - Rapikan frasa basi "INI YANG DIPERBAIKI DI BATCH INI" di baris Back gesture (nyisa dari v2_Batch1, udah 46 batch lalu, membingungkan).
+  - "Rekomendasi tes berikutnya" diganti total — prioritas lama (back gesture doang) diganti daftar fitur yang PALING BARU difix & butuh reconfirm (Backup/Restore, Settings scroll, Lock, Reminder sheet).
+  - Header "Update terakhir" diupdate ke v2_Batch47.
+- 1 file diubah (dokumentasi murni), jauh di bawah micro-batch limit. 0 file kode disentuh.
+- **Pending Queue**: kosong dari sisi dokumentasi. Status 🔧 di atas nunggu reconfirm device (lihat "Rekomendasi tes berikutnya" di `MAIN_GOALS.md`) buat naik ke ✅ — bukan blocker eksekusi, cuma nunggu laporan user.
+
+## [v2_Batch46] — 2026-08-28
 User: **"perbaiki touch sampling yang oversensitive. mis. kesenggol menu backup dikit aja langsung auto backup tanpa konfirmasi apa-apa (berlaku untuk semua logic yang berhubungan dengan touch user!!)"**.
 - **Klarifikasi teknis penting (jujur, bukan nolak kerjain)**: "touch sampling rate" literal itu level driver/hardware layar, di luar jangkauan kode app (Kotlin/Compose gak bisa ubah). Yang REALISTIS & actionable dari sisi app: aksi konsekuensial yang jalan LANGSUNG dari 1 tap tanpa jeda konfirmasi apapun — itu yang bikin fat-finger/senggol-dikit kerasa "oversensitive" krn 0 kesempatan buat batal. Itu yang dibenerin batch ini.
 - **Full inventory `.clickable`/`onClick`/swipe di SELURUH codebase** (`grep -rn` semua touch handler, bukan cuma Settings) — biar "semua logic touch" beneran ke-cover, bukan cuma nebak 1 titik dari contoh user:

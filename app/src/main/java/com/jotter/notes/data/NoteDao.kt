@@ -31,6 +31,9 @@ interface NoteDao {
     @Query("UPDATE notes SET isLocked = :value WHERE id = :id")
     suspend fun setLocked(id: String, value: Boolean)
 
+    @Query("UPDATE notes SET isPinned = :value WHERE id = :id")
+    suspend fun setPinned(id: String, value: Boolean)
+
     @Query("DELETE FROM notes WHERE id = :id")
     suspend fun permanentDelete(id: String)
 

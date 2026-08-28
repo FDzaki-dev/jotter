@@ -15,6 +15,7 @@ Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfir
 | Lock — Biometric | ❓ | Ditulis ulang pakai BiometricPrompt asli (bukan lewat plugin) - secara arsitektur harusnya lebih reliable, tapi tetap belum dites |
 | Grid/List toggle | ❓ | Belum dites |
 | In-app updater (cek/unduh/pasang) | ❓ | Kode lengkap end-to-end (infra Batch8 → logic Batch9 → UI Batch10), belum pernah dites di HP |
+| **Pin catatan ke status bar** | 🔧 | **BARU, dipilih dari Referensi Kompetitor sbg high-value/low-risk.** Slice 1 (data layer) selesai: field `isPinned` di `Note`, migration Room 1→2, `NoteDao.setPinned()`. Sisa slice (notification ongoing + tombol pin di UI + unpin-action) — lihat Pending Queue `PROJECT_STATE.md` |
 
 ## UI/UX (iOS template, versi Compose)
 | Goal | Status | Catatan |
@@ -36,7 +37,7 @@ _Digabung permanen 2026-08-28 dari 2 file riset user (`fitur_unggulan_colornote.
 ColorNote = acuan desain awal Jotter (warna kategori, checklist, kalender+reminder — lihat juga catatan treatment kartu warna di riwayat batch). Pilar fitur ColorNote vs status di Jotter:
 - **Warna kategori + filter** → Jotter ✅ ada (9 warna)
 - **Text note + checklist tanpa batas** → Jotter ✅ ada
-- **Kalender + reminder waktu, reminder harian, pin ke status bar** → Jotter ✅ kalender+reminder waktu ada; **pin ke status bar TIDAK ada** (belum jadi goal)
+- **Kalender + reminder waktu, reminder harian, pin ke status bar** → Jotter ✅ kalender+reminder waktu ada; **pin ke status bar** kini 🔧 sedang dikerjakan (lihat tabel CORE FEATURES di atas — dipromosikan dari referensi jadi goal resmi mulai v2_Batch36)
 - **Master Password + cloud backup/sync** → Jotter ✅ PIN/biometric ada; **cloud backup SENGAJA TIDAK ADA** (app 100% offline by design, lihat README)
 - **Sticky widget, auto-link teks, aplikasi ringan** → widget home-screen & auto-link **belum jadi goal**; ringan sudah otomatis dari native Kotlin
 

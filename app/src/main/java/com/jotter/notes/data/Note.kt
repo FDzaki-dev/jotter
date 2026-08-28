@@ -61,7 +61,8 @@ data class Note(
     var reminderAt: Long? = null,
     var isArchived: Boolean = false,
     var isDeleted: Boolean = false,
-    var isLocked: Boolean = false
+    var isLocked: Boolean = false,
+    var isPinned: Boolean = false
 ) {
     fun searchableText(): String =
         (title + " " + content + " " + checklistItems.joinToString(" ") { it.text }).lowercase()

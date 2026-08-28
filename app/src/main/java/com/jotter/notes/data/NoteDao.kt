@@ -16,6 +16,18 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE isDeleted = 0 AND reminderAt IS NOT NULL")
     fun observeWithReminders(): Flow<List<Note>>
 
+    // Backup feature: dump SEMUA notes tanpa filter (termasuk arsip/sampah/terkunci) - beda
+    // dari observe() yang MEMANG selalu filter isArchived/isDeleted utk kebutuhan tampilan UI.
+    // suspend biasa (bukan Flow) krn backup itu snapshot 1x, bukan observasi realtime.
+    @Query("SELECT * FROM notes")
+    suspend fun getAllForBackup(): List<Note>
+
+    // Deteksi "DB kosong" (uninstall+reinstall, atau galat/corrupt data) - dicek COUNT(*) TANPA
+    // filter, bukan cuma list yang lagi ke-observe di 1 tab (yang bisa 0 padahal notes lain ada
+    // tapi kefilter arsip/sampah - false positive kalau pakai itu).
+    @Query("SELECT COUNT(*) FROM notes")
+    suspend fun count(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(note: Note)
 

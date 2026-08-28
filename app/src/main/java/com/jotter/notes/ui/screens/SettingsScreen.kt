@@ -15,11 +15,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jotter.notes.auth.AuthManager
+import com.jotter.notes.backup.BackupFileInfo
+import com.jotter.notes.backup.BackupManager
+import com.jotter.notes.backup.BackupResult
+import com.jotter.notes.backup.RestoreResult
 import com.jotter.notes.ui.components.UpdateDialog
 import com.jotter.notes.updater.UpdateChecker
 import com.jotter.notes.viewmodel.SettingsViewModel
 import com.jotter.notes.viewmodel.UpdaterUiState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +46,13 @@ fun SettingsScreen(
         runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }
             .getOrNull() ?: "—"
     }
+    // Backup/restore (Batch40 — wiring UI dari logic Batch38/39). BackupManager itu `object`
+    // stateless, dipanggil langsung dari sini (bukan lewat SettingsViewModel) — pola sama dgn
+    // toggle PIN/Biometrik di file ini yang juga manggil AuthManager langsung, TANPA nambah
+    // state machine StateFlow spt updater (yg genuinely butuh multi-step: check→download→install).
+    var isBackingUp by remember { mutableStateOf(false) }
+    var isRestoring by remember { mutableStateOf(false) }
+    var pendingRestore by remember { mutableStateOf<BackupFileInfo?>(null) }
 
     LaunchedEffect(Unit) { viewModel.refresh() }
 
@@ -119,6 +132,51 @@ fun SettingsScreen(
                 modifier = Modifier.clickable(onClick = onOpenTrash)
             )
 
+            Text("CADANGAN DATA", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.labelSmall)
+            ListItem(
+                headlineContent = { Text("Backup Data") },
+                supportingContent = { Text("Simpan salinan semua catatan ke Documents/Jotter/backup (catatan terkunci disimpan tanpa isi asli, demi keamanan)") },
+                leadingContent = { Icon(Icons.Default.Backup, null) },
+                trailingContent = {
+                    if (isBackingUp) CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    else Icon(Icons.Default.ChevronRight, null)
+                },
+                modifier = Modifier.clickable(enabled = !isBackingUp) {
+                    isBackingUp = true
+                    scope.launch {
+                        val result = BackupManager.backup(context, "Jotter")
+                        isBackingUp = false
+                        val message = when (result) {
+                            is BackupResult.Success -> "Backup berhasil — ${result.noteCount} catatan disimpan (${result.fileName})"
+                            is BackupResult.Error -> "Backup gagal: ${result.message}"
+                        }
+                        snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
+                    }
+                }
+            )
+            ListItem(
+                headlineContent = { Text("Pulihkan dari Backup") },
+                supportingContent = { Text("Ambil catatan dari file backup paling baru di Documents/Jotter/backup") },
+                leadingContent = { Icon(Icons.Default.Restore, null) },
+                trailingContent = {
+                    if (isRestoring) CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    else Icon(Icons.Default.ChevronRight, null)
+                },
+                modifier = Modifier.clickable(enabled = !isRestoring) {
+                    scope.launch {
+                        val info = withContext(Dispatchers.IO) { BackupManager.findLatestBackup(context, "Jotter") }
+                        if (info == null) {
+                            snackbarHostState.showSnackbar(
+                                message = "Belum ada file backup ditemukan di Documents/Jotter/backup",
+                                duration = SnackbarDuration.Long
+                            )
+                        } else {
+                            pendingRestore = info
+                        }
+                    }
+                }
+            )
+
             Text("PEMBARUAN APLIKASI", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.labelSmall)
             ListItem(
                 headlineContent = { Text("Cek Pembaruan") },
@@ -152,6 +210,42 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.labelSmall
             )
         }
+    }
+
+    pendingRestore?.let { info ->
+        AlertDialog(
+            onDismissRequest = { pendingRestore = null },
+            title = { Text("Pulihkan dari Backup?") },
+            text = {
+                val dateStr = java.text.SimpleDateFormat("d MMM yyyy, HH:mm", java.util.Locale("id", "ID"))
+                    .format(java.util.Date(info.dateAddedSeconds * 1000L))
+                Text("File backup ditemukan dari $dateStr. Catatan dari file ini akan ditambahkan ke catatan yang ada sekarang (catatan dengan ID sama akan ditimpa versi backup). Lanjutkan?")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val uri = info.uri
+                    pendingRestore = null
+                    isRestoring = true
+                    scope.launch {
+                        val result = BackupManager.restore(context, uri)
+                        isRestoring = false
+                        val message = when (result) {
+                            is RestoreResult.Success -> {
+                                val base = "Berhasil memulihkan ${result.restoredCount} catatan"
+                                if (result.lockedPlaceholderCount > 0) {
+                                    "$base (${result.lockedPlaceholderCount} di antaranya catatan terkunci — isinya placeholder, bukan konten asli, sesuai desain keamanan backup)"
+                                } else base
+                            }
+                            is RestoreResult.Error -> "Pulihkan gagal: ${result.message}"
+                        }
+                        snackbarHostState.showSnackbar(message, duration = SnackbarDuration.Long)
+                    }
+                }) { Text("Pulihkan") }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingRestore = null }) { Text("Batal") }
+            }
+        )
     }
 
     UpdateDialog(

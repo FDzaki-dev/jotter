@@ -60,7 +60,7 @@ fun FilteredNotesScreen(
                 Text(if (isArchive) "Arsip kosong" else "Sampah kosong", color = Color.Gray)
             }
         } else {
-            LazyColumn(Modifier.padding(padding), contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(notes, key = { it.id }) { note ->
                     NoteCard(
                         note = note,

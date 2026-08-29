@@ -120,7 +120,7 @@ fun HomeScreen(
             )
         }
     ) { padding ->
-        Column(Modifier.padding(padding)) {
+        Column(Modifier.padding(padding).fillMaxSize()) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { viewModel.setSearchQuery(it) },

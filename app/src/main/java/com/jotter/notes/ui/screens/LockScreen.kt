@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -101,11 +103,30 @@ fun LockScreen(
             error?.let { Text(it, color = Color.Red) }
             Spacer(Modifier.height(24.dp))
 
-            val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫")
+            val canRetryBiometric = mode == LockMode.VERIFY && auth.isBiometricPreferenceEnabled() && auth.canUseBiometrics()
+            val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "biometric", "0", "⌫")
             LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.width(260.dp)) {
                 items(keys) { k ->
-                    if (k.isEmpty()) {
-                        Box(Modifier.size(64.dp))
+                    if (k == "biometric") {
+                        Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+                            if (canRetryBiometric) {
+                                IconButton(
+                                    modifier = Modifier.size(64.dp),
+                                    onClick = {
+                                        scope.launch {
+                                            val activity = context as? androidx.fragment.app.FragmentActivity
+                                            if (activity != null && auth.authenticateBiometric(activity)) onResult(true)
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        Icons.Default.Fingerprint,
+                                        contentDescription = "Coba sidik jari lagi",
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+                            }
+                        }
                     } else {
                         Box(
                             Modifier.size(64.dp).clip(CircleShape).clickable {

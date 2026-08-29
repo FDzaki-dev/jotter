@@ -81,6 +81,18 @@ private fun colorSchemeFor(theme: AppTheme) = if (theme == AppTheme.AMOLED) {
         surfaceVariant = Color(0x33FFFFFF),
         onBackground = Color.White,
         onSurface = Color.White,
+        // [Batch53] WAJIB dioverride juga - NavigationBar (bottom tab bar), ModalBottomSheet,
+        // dan Card TIDAK pakai colorScheme.background/surface polos, tapi token terpisah
+        // surfaceContainer* (default M3, beda dari surface biasa demi "elevation layering").
+        // Kalau gak dioverride, token ini diam2 fallback ke baseline M3 gelap solid (bukan
+        // Color.Transparent/turunan surface di atas) - itu sebabnya bottom nav bar & sheet
+        // (sort HomeScreen, color-picker+reminder NoteEditorScreen) tetap hitam pekat gak
+        // nembus gradient sama sekali, padahal Scaffold/TopAppBar di sekitarnya sudah benar.
+        surfaceContainerLowest = Color.Transparent,
+        surfaceContainerLow = Color(0x1FFFFFFF),
+        surfaceContainer = Color(0x1FFFFFFF),
+        surfaceContainerHigh = Color(0x33FFFFFF),
+        surfaceContainerHighest = Color(0x33FFFFFF),
     )
 }
 

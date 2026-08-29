@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v2_Batch53] - 2026-08-29
+### Fixed
+- Theme.kt: tambah override `surfaceContainer*` (Lowest/Low/-/High/Highest) di color scheme tema gradasi - token ini sebelumnya gak disentuh & fallback ke baseline M3 gelap solid, menyebabkan bottom navigation bar (dan ModalBottomSheet) tetap hitam pekat gak nembus gradient di tema Aurora/Senja/Samudra
+
 ## [v2_Batch25] - 2026-08-26
 ### Changed
 - NoteCard.kt: replace uniform border + header dot with left accent-color bar (4dp) + 14% background tint (lerp) - stronger per-note color identity matching original ColorNote-style spec (P2.12 color/border treatment)

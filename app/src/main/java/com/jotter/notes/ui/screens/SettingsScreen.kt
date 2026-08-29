@@ -2,6 +2,9 @@ package com.jotter.notes.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -9,7 +12,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
@@ -25,6 +31,8 @@ import com.jotter.notes.backup.BackupManager
 import com.jotter.notes.backup.BackupResult
 import com.jotter.notes.backup.RestoreResult
 import com.jotter.notes.ui.components.UpdateDialog
+import com.jotter.notes.ui.theme.AppTheme
+import com.jotter.notes.ui.theme.ThemeManager
 import com.jotter.notes.updater.UpdateChecker
 import com.jotter.notes.viewmodel.SettingsViewModel
 import com.jotter.notes.viewmodel.UpdaterUiState
@@ -110,6 +118,44 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
+            Text("TAMPILAN", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.labelSmall)
+            val currentTheme by ThemeManager.flow(context).collectAsState()
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                AppTheme.values().forEach { theme ->
+                    val isSelected = theme == currentTheme
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.clickable {
+                            ThemeManager.setTheme(context, theme)
+                        }
+                    ) {
+                        Box(
+                            Modifier
+                                .size(56.dp)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(Brush.verticalGradient(theme.previewSwatch))
+                                .then(
+                                    if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.medium)
+                                    else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isSelected) Icon(Icons.Default.Check, "Aktif", tint = Color.White)
+                        }
+                        Spacer(Modifier.height(4.dp))
+                        Text(theme.label, style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            HorizontalDivider()
+
             Text("KEAMANAN", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.labelSmall)
             ListItem(
                 headlineContent = { Text("Kunci Aplikasi (PIN)") },

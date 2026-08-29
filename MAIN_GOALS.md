@@ -17,6 +17,7 @@ Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfir
 | In-app updater (cek/unduh/pasang) | ❓ | Kode lengkap end-to-end (infra Batch8 → logic Batch9 → UI Batch10), belum pernah dites di HP. Beda dgn "Lihat Rilis di GitHub" (shortcut browser, Batch28) — itu bukan alur auto-update-nya sendiri |
 | Backup & Restore data | 🔧 | Siklus real device intensif Batch39-46: auto-detect restore (MediaStore) terbukti gak reliable di device user (OEM/XOS quirk, dikonfirmasi via tes terkontrol backup→hapus data→restore Batch44) → fallback SAF manual dibangun (Batch42) tapi sempat crash (fix Batch43) → dialog konfirmasi ditambah semua aksi backup/restore (Batch46). Backup Data (tulis) sendiri belum ada laporan gagal |
 | **Pin catatan ke status bar** | 🔧 | Slice 1/3 (data layer) selesai v2_Batch36. Slice 2/3 (notification layer) & 3/3 (tombol pin di UI) BELUM dikerjakan — lihat Pending Queue `PROJECT_STATE.md` |
+| Tema gradasi (Aurora/Senja/Samudra + AMOLED) | 🔧 | Baru dibangun Batch51 (arsitektur root-level, 0 screen individual disentuh) — belum ada konfirmasi device |
 
 ## UI/UX (iOS template, versi Compose)
 | Goal | Status | Catatan |

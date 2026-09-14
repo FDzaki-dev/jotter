@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,17 @@ import kotlinx.coroutines.withContext
  * biar gak nge-nag user berulang kali kalau mereka pilih "Nanti" tapi belum sempat bikin catatan
  * baru. Reset otomatis tiap proses app baru (cold start) — itu memang semantik yang diinginkan. */
 private var restoreCheckDoneThisProcess = false
+
+// v2_Batch57: FIX bug nyata dari laporan user "regresi dibagian background text" - `ModalBottomSheet`
+// (baik "Urutkan" MAUPUN "Tampilan") gak pernah di-set `containerColor`-nya secara eksplisit, jadi
+// dia jatuh ke default M3 `BottomSheetDefaults.ContainerColor` = token `surfaceContainerLow`. Utk
+// tema gradasi (Aurora/Senja/Samudra), `Theme.kt` set token itu ke `Color(0x1FFFFFFF)` (putih alpha
+// 12% - SAMA PERSIS akar bug yang sudah di-fix di NoteCard.kt Batch56, ternyata ada instance KE-2
+// yang kelewat: sheet-nya sendiri, bukan cuma kartu). Efeknya: teks "Tampilan/Daftar/Detail/Petak/
+// Petak Besar" dirender nyaris tanpa backing opaque, jadi visually numpuk sama konten layar di
+// belakangnya (kartu note, bottom nav) - persis "background text" yang dilaporkan user, HARUS
+// dipisah dari token surface manapun, sama seperti OpaqueCardBase.
+private val OpaqueSheetContainer = Color(0xFF242426)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -253,7 +265,7 @@ fun HomeScreen(
     }
 
     if (showSortSheet) {
-        ModalBottomSheet(onDismissRequest = { showSortSheet = false }) {
+        ModalBottomSheet(onDismissRequest = { showSortSheet = false }, containerColor = OpaqueSheetContainer) {
             Column(Modifier.padding(16.dp)) {
                 Text("Urutkan berdasarkan", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(12.dp))
@@ -283,7 +295,7 @@ fun HomeScreen(
     // v2_Batch54: sheet pemilih mode tampilan - pola identik showSortSheet di atas (Column+ListItem),
     // 4 opsi sesuai menu "Lihat" di video showcase ColorNote (Daftar/Detail/Petak/Petak Besar).
     if (showViewSheet) {
-        ModalBottomSheet(onDismissRequest = { showViewSheet = false }) {
+        ModalBottomSheet(onDismissRequest = { showViewSheet = false }, containerColor = OpaqueSheetContainer) {
             Column(Modifier.padding(16.dp)) {
                 Text("Tampilan", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(12.dp))

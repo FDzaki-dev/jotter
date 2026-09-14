@@ -1,5 +1,5 @@
 # MAIN_GOALS — Jotter
-Update terakhir: v2_Batch56 (2026-09-14) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
+Update terakhir: v2_Batch57 (2026-09-14) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
 
 Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfirmasi | ❓ Terimplementasi, belum pernah dites | ⚠️ Deviasi diketahui
 
@@ -13,7 +13,9 @@ Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfir
 | Archive & Trash | ❓ | Belum dites |
 | Lock — PIN | 🔧 | Real device test nemu bug KEAMANAN KRITIS (note terkunci bisa dibuka tanpa PIN sama sekali, Batch13) — sudah difix, BELUM ada konfirmasi eksplisit final pasca-fix |
 | Lock — Biometric | 🔧 | Sama dgn Lock—PIN di atas (1 gerbang verifikasi yang sama) |
-| Grid/List toggle | 🔧 | Batch54: 2→4 mode. Batch55: fix kolom+declutter. Batch56: fix bug transparansi kartu (Batch55 sendiri) + kontras teks (`Color.Gray`→`JotterSecondaryLabel`, judul→`Color.White` eksplisit). 3 iterasi berturut, MASIH nunggu konfirmasi device final |
+| Grid/List toggle | 🔧 | Batch54→56 histori di atas. Batch57: recording PERTAMA dari Jotter langsung (bukan referensi lagi) konfirmasi KARTU sudah bagus, tapi nemu bug baru di sheet "Tampilan" (lihat baris di bawah). Kolom "Petak" masih perlu dikonfirmasi ulang (video nunjukkin 2, belum pasti build yang dites sudah versi terbaru) |
+| Sheet "Tampilan"/"Urutkan" - readability | 🔧 | BARU (Batch57): kedua sheet gak pernah di-set containerColor, transparan total di tema gradasi (bug sama dgn NoteCard.kt Batch56, kelewat krn fokus cuma di kartu). Di-fix pakai containerColor eksplisit. Belum dites device |
+| Tab-switch ghosting (Kalender/Catatan/Pengaturan) | ❓ | OBSERVASI Batch57 dari recording: sempat kelihatan konten tab lain ngintip transparan di belakang Kalender selama ~1 frame. BELUM dipastikan bug nyata vs cuma artefak transisi/recording. NavGraph.kt belum pernah diinvestigasi - nunggu konfirmasi user sebelum masuk pending queue resmi |
 | Tanggal di kartu note (beranda) | 🔧 | Batch54: ditambah di Daftar/Detail. Batch55: SENGAJA disembunyikan lagi khusus di Petak/Petak Besar (bikin sesak, video referensi 0 tanggal di grid) — di Daftar/Detail tetap tampil. Belum dites device |
 | Checklist tuntas (visual gray+strikethrough) | 🔧 | Ditambah Batch54, dikonfirmasi tetap berlaku di mode grid juga (Batch55, sesuai video referensi ke-2) — belum dites device |
 | In-app updater (cek/unduh/pasang) | ❓ | Kode lengkap end-to-end (infra Batch8 → logic Batch9 → UI Batch10), belum pernah dites di HP. Beda dgn "Lihat Rilis di GitHub" (shortcut browser, Batch28) — itu bukan alur auto-update-nya sendiri |

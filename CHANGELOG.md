@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v2_Batch57] - 2026-09-14
+### Fixed
+- Sheet "Tampilan" dan "Urutkan" (muncul dari beranda) kini punya latar solid - sebelumnya nyaris tembus pandang di tema gradasi (Aurora/Senja/Samudra) sehingga tulisan menu bertumpuk dengan konten di belakangnya dan sulit dibaca
+
 ## [v2_Batch56] - 2026-09-14
 ### Fixed
 - Latar kartu note kini selalu 100% opak (bug di versi sebelumnya membuat latar kartu tembus pandang di tema gradasi Aurora/Senja/Samudra, sehingga warna dan kontras jadi tidak konsisten)

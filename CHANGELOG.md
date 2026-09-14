@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v2_Batch55] - 2026-09-14
+### Fixed
+- Mode tampilan Petak: kolom dikoreksi dari 2 menjadi 3 sesuai referensi asli
+- Mode tampilan Petak Besar: kolom dikoreksi menjadi 2 (kartu lebih besar, bukan lebih banyak teks)
+- Kartu di mode Petak/Petak Besar disederhanakan (judul + isi saja) - sebelumnya kelebihan muatan (tanggal, badge waktu pengingat) sehingga sesak dan sulit dibaca
+- Warna latar kartu kini mengikuti tema aktif (sebelumnya selalu memakai basis warna gelap default, tidak konsisten di tema non-default)
+- Kontras warna kategori per-catatan diperkuat agar lebih mudah dibedakan
+
 ## [v2_Batch54] - 2026-09-14
 ### Added
 - Beranda: tanggal terakhir diubah kini tampil di setiap kartu catatan (sebelumnya tidak pernah dirender)

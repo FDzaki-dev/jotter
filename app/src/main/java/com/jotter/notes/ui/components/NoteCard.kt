@@ -18,16 +18,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jotter.notes.data.Note
 import com.jotter.notes.data.NoteType
-import com.jotter.notes.ui.theme.JotterSurface
 import com.jotter.notes.ui.theme.noteColorFor
 import java.util.Calendar
 
-// v2_Batch54: kepadatan kartu utk 4 mode tampilan HomeScreen (video showcase ColorNote - menu
-// "Lihat": Daftar/Detail/Petak/Petak Besar). COMPACT = "Daftar" (0 preview, cuma judul+tanggal,
-// padding minimal). NORMAL = "Detail"/"Petak" (perilaku lama, TIDAK berubah sama sekali kalau
-// parameter ini di-default/tidak diisi - 0 regresi utk pemanggil existing spt FilteredNotesScreen.kt
-// yang belum di-update). LARGE = "Petak Besar" (preview lebih panjang, tipografi/padding lebih besar).
-enum class CardDensity { COMPACT, NORMAL, LARGE }
+// v2_Batch55: HAPUS TOTAL kesalahan Batch54 - "Petak"/"Petak Besar" dulu di-treat sbg cuma
+// "NORMAL density lain" (isi sama-persis dgn Detail: icon row+reminder-teks+tanggal, cuma beda
+// jumlah baris preview) - itu sebabnya user lapor "beda jauh sama video" + "readability buruk":
+// kartu grid jadi sesak (title+preview+tanggal+badge dijejalkan ke kolom sempit). Video showcase
+// user (Screen_Recording ke-2, ColorNote mode "Petak" nyata - bukan cuma menu-nya lagi) confirm:
+// grid card ColorNote CUMA judul (boleh 2 baris/wrap) + isi (natural, gak dipotong pendek-pendek)
+// - 0 tanggal, 0 badge reminder bertuliskan waktu, 0 baris ikon terpisah. Sekarang tiap mode
+// 1:1 dgn ViewMode (gak ada lagi 2 ViewMode berbagi 1 nilai density yang sama):
+// COMPACT=Daftar, DETAIL=Detail, GRID=Petak(3 kolom), GRID_LARGE=Petak Besar(2 kolom).
+enum class CardDensity { COMPACT, DETAIL, GRID, GRID_LARGE }
 
 // Native Compose swipe-to-reveal-actions - real gesture handling via SwipeToDismissBox,
 // no third-party plugin indirection (this replaces the flaky flutter_slidable approach).
@@ -43,7 +46,7 @@ fun NoteCard(
     archiveColor: Color = Color(0xFFFF9500),
     deleteLabel: String = "Hapus",
     deleteIcon: androidx.compose.ui.graphics.vector.ImageVector = Icons.Default.Delete,
-    density: CardDensity = CardDensity.NORMAL,
+    density: CardDensity = CardDensity.DETAIL,
 ) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
@@ -84,56 +87,77 @@ fun NoteCard(
 @Composable
 private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity) {
     val accentColor = noteColorFor(note.colorIndex)
-    // P2.12 color/border treatment: swap uniform 1.5dp border ring + small header dot for a
-    // left accent bar + subtle background tint (14% lerp toward the note's color). Closer to
-    // the original ColorNote-style bold per-note color signature from the spec than a plain
-    // outline was - the color is now the card's dominant visual identity, not an afterthought.
-    val cardBackground = lerp(JotterSurface, accentColor, 0.14f)
+    // v2_Batch55: base lerp dari MaterialTheme.colorScheme.surface (ikut tema aktif - default
+    // gelap ATAUPUN tema gradasi Aurora/Senja/Samudra), BUKAN konstanta JotterSurface yang
+    // di-hardcode (perilaku Batch25-54) - itu SELALU nge-lerp dari hitam pekat gak peduli tema
+    // apa yang lagi aktif, jadi kalau tema aktif bukan default, warna kartu ketuker/gak nyambung
+    // dgn background sekitarnya (kandidat kuat kenapa user lapor readability buruk). Fraksi lerp
+    // dinaikkan 0.14 -> 0.24 - 14% dulu ketutup gak kebaca jadi identitas warna per-note nyaris
+    // gak kelihatan (video showcase user warna per-note SANGAT jelas beda satu sama lain).
+    val surfaceBase = MaterialTheme.colorScheme.surface
+    val cardBackground = lerp(surfaceBase, accentColor, 0.24f)
 
-    // v2_Batch54: checklist "semua item tercentang" - treatment visual grayed-out+strikethrough
-    // + badge centang, meniru kartu "Daftar barang" di video showcase (checklist tuntas, bukan
-    // note biasa). Sengaja tidak berlaku kalau note.isLocked (title/preview memang sudah
-    // disamarkan total di jalur lock, jangan dobel logic di titik yang sama).
+    // Checklist "semua item tercentang" - treatment visual grayed-out+strikethrough + badge
+    // centang, meniru kartu "Daftar barang" di video showcase (baik mode Detail MAUPUN Petak -
+    // dikonfirmasi video ke-2, kartu itu tetap gray+strikethrough+centang di grid juga).
     val isFullyChecked = note.type == NoteType.CHECKLIST &&
         note.checklistItems.isNotEmpty() &&
         note.checklistItems.all { it.isChecked } &&
         !note.isLocked
 
+    // v2_Batch55: PENYEBAB UTAMA laporan user - Batch54 nyamain isi kartu "Petak" 1:1 dgn
+    // "Detail" (cuma beda jumlah baris preview), padahal video showcase nunjukin kartu grid
+    // ColorNote MEMANG jauh lebih minimalis (judul+isi doang, 0 tanggal, 0 badge reminder
+    // bertuliskan jam). isGrid=true --> sembunyikan tanggal & teks reminder (icon tetap ada,
+    // ringkas), title boleh 2 baris (bukan 1, video-nya title suka wrap ke baris ke-2).
+    val isGrid = density == CardDensity.GRID || density == CardDensity.GRID_LARGE
     val contentPadding = when (density) {
         CardDensity.COMPACT -> 10.dp
-        CardDensity.LARGE -> 16.dp
-        CardDensity.NORMAL -> 14.dp
+        CardDensity.GRID -> 10.dp
+        CardDensity.GRID_LARGE -> 14.dp
+        CardDensity.DETAIL -> 14.dp
     }
-    val titleStyle = if (density == CardDensity.LARGE) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
-    val previewTextMaxLines = if (density == CardDensity.LARGE) 8 else 4
-    val previewChecklistMaxItems = if (density == CardDensity.LARGE) 6 else 3
+    val titleStyle = if (density == CardDensity.GRID_LARGE) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
+    val titleMaxLines = if (isGrid) 2 else 1
+    val previewTextMaxLines = when (density) {
+        CardDensity.GRID -> 3
+        CardDensity.GRID_LARGE -> 5
+        else -> 4
+    }
+    val previewChecklistMaxItems = when (density) {
+        CardDensity.GRID -> 4
+        CardDensity.GRID_LARGE -> 6
+        else -> 3
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
             .clip(RoundedCornerShape(16.dp))
             .background(cardBackground)
             .clickable(onClick = onTap)
     ) {
         Box(Modifier.width(4.dp).fillMaxHeight().background(accentColor))
         Column(modifier = Modifier.weight(1f).padding(contentPadding)) {
+        // v2_Batch55: baris icon status (lock/reminder/checklist-selesai) TETAP ada di semua mode
+        // termasuk grid - ini status penting (terkunci/ada pengingat), beda dari tanggal/reminder-
+        // teks yang murni metadata dekoratif. Bedanya cuma di grid: reminder TANPA teks jam
+        // (cuma icon, hemat lebar kolom sempit).
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (note.isLocked) Icon(Icons.Default.Lock, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
             Spacer(Modifier.weight(1f))
             note.reminderAt?.let { reminderAt ->
                 if (note.isLocked) {
-                    // Note terkunci: cukup tunjukkan ADA pengingat (perilaku lama, sudah aman),
-                    // tapi JANGAN tampilkan tanggal/jam spesifik — itu metadata baru yang bisa
-                    // bocorkan konteks note terkunci, melanggar invariant masking (Batch1/11/13).
                     Icon(Icons.Default.Notifications, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
                 } else {
                     val isOverdue = reminderAt < System.currentTimeMillis()
                     val reminderColor = if (isOverdue) Color(0xFFFF3B30) else Color.Gray
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Notifications, null, tint = reminderColor, modifier = Modifier.size(14.dp))
-                        Spacer(Modifier.width(3.dp))
-                        Text(formatReminderBadge(reminderAt), color = reminderColor, style = MaterialTheme.typography.labelSmall)
+                        if (!isGrid) {
+                            Spacer(Modifier.width(3.dp))
+                            Text(formatReminderBadge(reminderAt), color = reminderColor, style = MaterialTheme.typography.labelSmall)
+                        }
                     }
                 }
             }
@@ -146,7 +170,7 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity)
         if (note.title.isNotEmpty() && !note.isLocked) {
             Text(
                 note.title,
-                maxLines = 1,
+                maxLines = titleMaxLines,
                 overflow = TextOverflow.Ellipsis,
                 style = titleStyle,
                 color = if (isFullyChecked) Color.Gray else Color.Unspecified,
@@ -156,9 +180,7 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity)
             Text("Catatan Terkunci", maxLines = 1, overflow = TextOverflow.Ellipsis, style = titleStyle, color = Color.Gray)
         }
 
-        // "Daftar" (COMPACT): meniru mode List ringkas ColorNote - cuma judul+tanggal, 0 preview
-        // sama sekali (bukan cuma dipangkas ke 1 baris), biar densitas per layar jauh lebih tinggi
-        // dibanding Detail/Petak/Petak Besar - itu esensi bedanya "Daftar" vs 3 mode lain.
+        // "Daftar" (COMPACT): 0 preview sama sekali, cuma judul+tanggal - densitas tertinggi.
         if (density != CardDensity.COMPACT) {
             Spacer(Modifier.height(6.dp))
             when {
@@ -186,13 +208,10 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity)
             }
         }
 
-        // v2_Batch54: tanggal terakhir diubah - SEBELUMNYA TIDAK PERNAH dirender sama sekali di
-        // kartu manapun (LIST/GRID), padahal `modifiedAt` sudah ada di data model & dipakai di
-        // tempat lain (dialog restore, dst). Video showcase user (ColorNote) menampilkan tanggal
-        // di SETIAP kartu tanpa kecuali - gap paling jelas yang bikin beranda kerasa "belum selesai"
-        // dibanding referensi. Sengaja TIDAK ditampilkan utk note terkunci (konsisten dgn masking
-        // metadata lain di kartu terkunci - lihat komentar reminder di atas).
-        if (!note.isLocked) {
+        // Tanggal terakhir diubah - SENGAJA cuma di Daftar & Detail (1 kolom, lebar cukup utk
+        // metadata tambahan). Disembunyikan total di Petak/Petak Besar (lihat komentar isGrid di
+        // atas - gap paling jelas dari laporan user, kartu grid kudu minimalis kayak video).
+        if (!note.isLocked && !isGrid) {
             Spacer(Modifier.height(if (density == CardDensity.COMPACT) 2.dp else 8.dp))
             Text(formatCardDate(note.modifiedAt), color = Color.Gray, style = MaterialTheme.typography.labelSmall)
         }
@@ -200,7 +219,7 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity)
     }
 }
 
-/** "14:30" kalau hari ini, "26 Agu 14:30" kalau bukan — biar badge di kartu sempit (grid 2 kolom) tetap ringkas. */
+/** "14:30" kalau hari ini, "26 Agu 14:30" kalau bukan — dipakai di Daftar/Detail (grid cuma pakai icon, lihat isGrid di atas). */
 private fun formatReminderBadge(reminderAt: Long): String {
     val cal = Calendar.getInstance().apply { timeInMillis = reminderAt }
     val now = Calendar.getInstance()
@@ -212,9 +231,7 @@ private fun formatReminderBadge(reminderAt: Long): String {
     return "${dateFmt.format(cal.time)} $timeStr"
 }
 
-/** v2_Batch54: tanggal terakhir diubah di footer kartu - "10 Sep" kalau tahun berjalan (pola sama
- * dgn formatReminderBadge di atas), "26 Mei 2025" kalau beda tahun - konsisten dgn tampilan
- * tanggal ala ColorNote di video showcase (tahun cuma muncul kalau relevan/bukan tahun ini). */
+/** Tanggal terakhir diubah di footer kartu (Daftar/Detail doang) - "10 Sep" tahun berjalan, "26 Mei 2025" beda tahun. */
 private fun formatCardDate(modifiedAt: Long): String {
     val cal = Calendar.getInstance().apply { timeInMillis = modifiedAt }
     val now = Calendar.getInstance()

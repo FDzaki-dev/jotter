@@ -179,10 +179,13 @@ fun HomeScreen(
                     )
                 }
             } else if (viewMode == ViewMode.GRID || viewMode == ViewMode.GRID_LARGE) {
-                // "Petak" & "Petak Besar" - sama2 grid 2 kolom (Fixed(2) TIDAK diubah, murni ubah
-                // besaran isi kartu lewat CardDensity), beda cuma densitas konten tiap kartu.
+                // v2_Batch55: FIX laporan user - video showcase ke-2 (hasil nyata mode "Petak"
+                // ColorNote, bukan cuma menu-nya) confirm 3 KOLOM, bukan 2 spt asumsi Batch54.
+                // "Petak Besar" = 2 kolom (tile lebih besar/lebar) - penamaan "besar" = kartu lebih
+                // besar, bukan lebih banyak baris teks dijejalkan ke kartu sempit (itu kesalahan
+                // Batch54 yang bikin readability buruk).
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
+                    columns = GridCells.Fixed(if (viewMode == ViewMode.GRID_LARGE) 2 else 3),
                     contentPadding = PaddingValues(12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -193,13 +196,13 @@ fun HomeScreen(
                             onTap = { onOpenNote(note.id) },
                             onArchive = { archiveWithUndo(note) },
                             onDelete = { deleteWithUndo(note) },
-                            density = if (viewMode == ViewMode.GRID_LARGE) CardDensity.LARGE else CardDensity.NORMAL
+                            density = if (viewMode == ViewMode.GRID_LARGE) CardDensity.GRID_LARGE else CardDensity.GRID
                         )
                     }
                 }
             } else {
                 // "Daftar" (LIST) & "Detail" - sama2 1 kolom, beda cuma COMPACT (0 preview) vs
-                // NORMAL (preview penuh, perilaku lama).
+                // DETAIL (preview penuh + tanggal, perilaku lama, TIDAK berubah dari Batch54).
                 LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(notes, key = { it.id }) { note ->
                         NoteCard(
@@ -207,7 +210,7 @@ fun HomeScreen(
                             onTap = { onOpenNote(note.id) },
                             onArchive = { archiveWithUndo(note) },
                             onDelete = { deleteWithUndo(note) },
-                            density = if (viewMode == ViewMode.LIST) CardDensity.COMPACT else CardDensity.NORMAL
+                            density = if (viewMode == ViewMode.LIST) CardDensity.COMPACT else CardDensity.DETAIL
                         )
                     }
                 }

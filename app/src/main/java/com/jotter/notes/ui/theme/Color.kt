@@ -24,4 +24,10 @@ val JotterBackground = Color(0xFF000000)
 val JotterSurface = Color(0xFF1C1C1E)
 val JotterSurfaceElevated = Color(0xFF2C2C2E)
 val JotterLabel = Color(0xFFFFFFFF)
-val JotterSecondaryLabel = Color(0xFF8E8E93)
+// v2_Batch56: nilai lama (0xFF8E8E93) itu warna "secondaryLabel" iOS mode TERANG (didesain utk
+// teks di atas background PUTIH) - dipakai di app yang 100% GELAP (JotterBackground hitam),
+// kontrasnya jelek (abu-gelap di atas gelap). Constant ini SEBELUMNYA 0 DIPAKAI DI MANAPUN
+// (grep dikonfirmasi 0 referensi) - jadi ubah nilainya 0 risiko regresi ke fitur lain, sekaligus
+// akhirnya benar2 dipakai (NoteCard.kt) sbg satu-satunya sumber warna teks sekunder di kartu.
+// Nilai baru = abu-abu TERANG ala iOS secondaryLabel mode GELAP (teks putih 60% di atas hitam).
+val JotterSecondaryLabel = Color(0xFFAEAEB2)

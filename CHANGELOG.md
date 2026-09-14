@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v2_Batch56] - 2026-09-14
+### Fixed
+- Latar kartu note kini selalu 100% opak (bug di versi sebelumnya membuat latar kartu tembus pandang di tema gradasi Aurora/Senja/Samudra, sehingga warna dan kontras jadi tidak konsisten)
+- Kontras teks sekunder (isi catatan, tanggal, badge pengingat) ditingkatkan - sebelumnya memakai abu-abu yang didesain untuk latar terang, tidak cocok untuk aplikasi bertema gelap
+- Judul catatan kini selalu putih terang, tidak lagi tergantung warna bawaan yang tidak konsisten
+- Warna kategori per-catatan diperkuat lagi agar lebih mudah dibedakan
+
 ## [v2_Batch55] - 2026-09-14
 ### Fixed
 - Mode tampilan Petak: kolom dikoreksi dari 2 menjadi 3 sesuai referensi asli

@@ -18,18 +18,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.jotter.notes.data.Note
 import com.jotter.notes.data.NoteType
+import com.jotter.notes.ui.theme.JotterSecondaryLabel
 import com.jotter.notes.ui.theme.noteColorFor
 import java.util.Calendar
 
-// v2_Batch55: HAPUS TOTAL kesalahan Batch54 - "Petak"/"Petak Besar" dulu di-treat sbg cuma
-// "NORMAL density lain" (isi sama-persis dgn Detail: icon row+reminder-teks+tanggal, cuma beda
-// jumlah baris preview) - itu sebabnya user lapor "beda jauh sama video" + "readability buruk":
-// kartu grid jadi sesak (title+preview+tanggal+badge dijejalkan ke kolom sempit). Video showcase
-// user (Screen_Recording ke-2, ColorNote mode "Petak" nyata - bukan cuma menu-nya lagi) confirm:
-// grid card ColorNote CUMA judul (boleh 2 baris/wrap) + isi (natural, gak dipotong pendek-pendek)
-// - 0 tanggal, 0 badge reminder bertuliskan waktu, 0 baris ikon terpisah. Sekarang tiap mode
-// 1:1 dgn ViewMode (gak ada lagi 2 ViewMode berbagi 1 nilai density yang sama):
-// COMPACT=Daftar, DETAIL=Detail, GRID=Petak(3 kolom), GRID_LARGE=Petak Besar(2 kolom).
+// v2_Batch56: FIX bug nyata dari "fix" Batch55 sendiri. Batch55 ganti basis lerp dari konstanta
+// hardcode ke `MaterialTheme.colorScheme.surface` dgn TEORI "biar ikut tema aktif" - TAPI gak
+// pernah dicek nilai literal token itu utk 3 dari 4 tema (Aurora/Senja/Samudra): `surface =
+// Color(0x1FFFFFFF)` alias PUTIH DI ALPHA CUMA 12% (lihat Theme.kt - ini token "glassmorphism",
+// sengaja transparan biar gradient background nembus, BUKAN warna solid biasa). `lerp()` ikut
+// nge-interpolasi channel ALPHA juga - hasilnya kartu jadi 30-40% opacity doang, warna &
+// kontrasnya jadi TERGANTUNG apa yang ada di belakangnya (gradient warna-warni Aurora/Senja/
+// Samudra) - itu sebabnya user lapor background/font/label SEMUA buruk pasca-Batch55 (bukan
+// membaik, malah lebih gak predictable dari Batch54). FIX: pisahkan total dari token surface
+// manapun - kartu note butuh backing SELALU OPAQUE biar teks di atasnya SELALU kebaca, gak
+// peduli tema/gradient apa yang aktif di baliknya. Trade-off sadar: kartu jadi flat/solid, gak
+// ikut efek glassmorphism tema gradasi (itu memang utk chrome/sheet, bukan utk konten note).
+private val OpaqueCardBase = Color(0xFF1C1C1E)
+
 enum class CardDensity { COMPACT, DETAIL, GRID, GRID_LARGE }
 
 // Native Compose swipe-to-reveal-actions - real gesture handling via SwipeToDismissBox,
@@ -87,29 +93,19 @@ fun NoteCard(
 @Composable
 private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity) {
     val accentColor = noteColorFor(note.colorIndex)
-    // v2_Batch55: base lerp dari MaterialTheme.colorScheme.surface (ikut tema aktif - default
-    // gelap ATAUPUN tema gradasi Aurora/Senja/Samudra), BUKAN konstanta JotterSurface yang
-    // di-hardcode (perilaku Batch25-54) - itu SELALU nge-lerp dari hitam pekat gak peduli tema
-    // apa yang lagi aktif, jadi kalau tema aktif bukan default, warna kartu ketuker/gak nyambung
-    // dgn background sekitarnya (kandidat kuat kenapa user lapor readability buruk). Fraksi lerp
-    // dinaikkan 0.14 -> 0.24 - 14% dulu ketutup gak kebaca jadi identitas warna per-note nyaris
-    // gak kelihatan (video showcase user warna per-note SANGAT jelas beda satu sama lain).
-    val surfaceBase = MaterialTheme.colorScheme.surface
-    val cardBackground = lerp(surfaceBase, accentColor, 0.24f)
+    // v2_Batch56: OpaqueCardBase (selalu 100% opacity, lihat komentar top-of-file) - BUKAN lagi
+    // MaterialTheme.colorScheme.surface (Batch55, bug) ATAUPUN JotterSurface (Batch25-54, benar
+    // secara kebetulan krn AMOLED-only, tapi gak eksplisit/gak didokumentasi KENAPA harus opaque).
+    // Fraksi lerp naik lagi 0.24 -> 0.32 - identitas warna kategori makin jelas dibedakan.
+    val cardBackground = lerp(OpaqueCardBase, accentColor, 0.32f)
 
     // Checklist "semua item tercentang" - treatment visual grayed-out+strikethrough + badge
-    // centang, meniru kartu "Daftar barang" di video showcase (baik mode Detail MAUPUN Petak -
-    // dikonfirmasi video ke-2, kartu itu tetap gray+strikethrough+centang di grid juga).
+    // centang, meniru kartu "Daftar barang" di video showcase (berlaku di semua mode termasuk grid).
     val isFullyChecked = note.type == NoteType.CHECKLIST &&
         note.checklistItems.isNotEmpty() &&
         note.checklistItems.all { it.isChecked } &&
         !note.isLocked
 
-    // v2_Batch55: PENYEBAB UTAMA laporan user - Batch54 nyamain isi kartu "Petak" 1:1 dgn
-    // "Detail" (cuma beda jumlah baris preview), padahal video showcase nunjukin kartu grid
-    // ColorNote MEMANG jauh lebih minimalis (judul+isi doang, 0 tanggal, 0 badge reminder
-    // bertuliskan jam). isGrid=true --> sembunyikan tanggal & teks reminder (icon tetap ada,
-    // ringkas), title boleh 2 baris (bukan 1, video-nya title suka wrap ke baris ke-2).
     val isGrid = density == CardDensity.GRID || density == CardDensity.GRID_LARGE
     val contentPadding = when (density) {
         CardDensity.COMPACT -> 10.dp
@@ -130,6 +126,14 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity)
         else -> 3
     }
 
+    // v2_Batch56: SEMUA teks/icon "sekunder" di kartu (preview, item checklist, tanggal, badge
+    // reminder, placeholder terkunci) sekarang SATU sumber warna: JotterSecondaryLabel (abu TERANG
+    // ala iOS dark-mode, lihat Color.kt) - GANTI TOTAL dari `Color.Gray` (abu medium generik Compose,
+    // kontrasnya lemah di atas kartu gelap+tinted). Judul pakai Color.White eksplisit (bukan
+    // Color.Unspecified/inherit) - predictable 100%, gak gantung ke resolusi ambient content-color
+    // yang secara teori sama tapi gak pernah benar2 diverifikasi via compile di sandbox ini.
+    val secondaryColor = JotterSecondaryLabel
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -139,19 +143,15 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity)
     ) {
         Box(Modifier.width(4.dp).fillMaxHeight().background(accentColor))
         Column(modifier = Modifier.weight(1f).padding(contentPadding)) {
-        // v2_Batch55: baris icon status (lock/reminder/checklist-selesai) TETAP ada di semua mode
-        // termasuk grid - ini status penting (terkunci/ada pengingat), beda dari tanggal/reminder-
-        // teks yang murni metadata dekoratif. Bedanya cuma di grid: reminder TANPA teks jam
-        // (cuma icon, hemat lebar kolom sempit).
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (note.isLocked) Icon(Icons.Default.Lock, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+            if (note.isLocked) Icon(Icons.Default.Lock, null, tint = secondaryColor, modifier = Modifier.size(14.dp))
             Spacer(Modifier.weight(1f))
             note.reminderAt?.let { reminderAt ->
                 if (note.isLocked) {
-                    Icon(Icons.Default.Notifications, null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+                    Icon(Icons.Default.Notifications, null, tint = secondaryColor, modifier = Modifier.size(14.dp))
                 } else {
                     val isOverdue = reminderAt < System.currentTimeMillis()
-                    val reminderColor = if (isOverdue) Color(0xFFFF3B30) else Color.Gray
+                    val reminderColor = if (isOverdue) Color(0xFFFF3B30) else secondaryColor
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Notifications, null, tint = reminderColor, modifier = Modifier.size(14.dp))
                         if (!isGrid) {
@@ -163,7 +163,7 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity)
             }
             if (isFullyChecked) {
                 Spacer(Modifier.width(6.dp))
-                Icon(Icons.Default.CheckCircle, "Checklist selesai", tint = Color.Gray, modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.CheckCircle, "Checklist selesai", tint = secondaryColor, modifier = Modifier.size(16.dp))
             }
         }
         Spacer(Modifier.height(8.dp))
@@ -173,53 +173,51 @@ private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity)
                 maxLines = titleMaxLines,
                 overflow = TextOverflow.Ellipsis,
                 style = titleStyle,
-                color = if (isFullyChecked) Color.Gray else Color.Unspecified,
+                color = if (isFullyChecked) secondaryColor else Color.White,
                 textDecoration = if (isFullyChecked) TextDecoration.LineThrough else null
             )
         } else if (note.isLocked) {
-            Text("Catatan Terkunci", maxLines = 1, overflow = TextOverflow.Ellipsis, style = titleStyle, color = Color.Gray)
+            Text("Catatan Terkunci", maxLines = 1, overflow = TextOverflow.Ellipsis, style = titleStyle, color = secondaryColor)
         }
 
         // "Daftar" (COMPACT): 0 preview sama sekali, cuma judul+tanggal - densitas tertinggi.
         if (density != CardDensity.COMPACT) {
             Spacer(Modifier.height(6.dp))
             when {
-                note.isLocked -> Text("•••••••", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                note.isLocked -> Text("•••••••", color = secondaryColor, style = MaterialTheme.typography.bodySmall)
                 note.type == NoteType.CHECKLIST -> Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     note.checklistItems.take(previewChecklistMaxItems).forEach { item ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 if (item.isChecked) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                                null, tint = Color.Gray, modifier = Modifier.size(14.dp)
+                                null, tint = secondaryColor, modifier = Modifier.size(14.dp)
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 item.text,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = Color.Gray,
+                                color = secondaryColor,
                                 textDecoration = if (item.isChecked) TextDecoration.LineThrough else null,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
                 }
-                else -> Text(note.content, maxLines = previewTextMaxLines, overflow = TextOverflow.Ellipsis, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                else -> Text(note.content, maxLines = previewTextMaxLines, overflow = TextOverflow.Ellipsis, color = secondaryColor, style = MaterialTheme.typography.bodySmall)
             }
         }
 
-        // Tanggal terakhir diubah - SENGAJA cuma di Daftar & Detail (1 kolom, lebar cukup utk
-        // metadata tambahan). Disembunyikan total di Petak/Petak Besar (lihat komentar isGrid di
-        // atas - gap paling jelas dari laporan user, kartu grid kudu minimalis kayak video).
+        // Tanggal terakhir diubah - cuma di Daftar & Detail (lihat isGrid, tetap dari Batch55).
         if (!note.isLocked && !isGrid) {
             Spacer(Modifier.height(if (density == CardDensity.COMPACT) 2.dp else 8.dp))
-            Text(formatCardDate(note.modifiedAt), color = Color.Gray, style = MaterialTheme.typography.labelSmall)
+            Text(formatCardDate(note.modifiedAt), color = secondaryColor, style = MaterialTheme.typography.labelSmall)
         }
         }
     }
 }
 
-/** "14:30" kalau hari ini, "26 Agu 14:30" kalau bukan — dipakai di Daftar/Detail (grid cuma pakai icon, lihat isGrid di atas). */
+/** "14:30" kalau hari ini, "26 Agu 14:30" kalau bukan — dipakai di Daftar/Detail (grid cuma pakai icon). */
 private fun formatReminderBadge(reminderAt: Long): String {
     val cal = Calendar.getInstance().apply { timeInMillis = reminderAt }
     val now = Calendar.getInstance()

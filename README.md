@@ -1,6 +1,6 @@
 # Jotter (Native Kotlin + Jetpack Compose)
 
-Aplikasi catatan 100% offline, gaya iOS. Rewrite total dari versi Flutter (lihat PROJECT_STATE.md untuk alasan). Teks & checklist, 9 warna kategori, kalender + pengingat, arsip, sampah, kunci PIN/biometrik, grid/list, pencarian & pengurutan penuh.
+Aplikasi catatan 100% offline, gaya iOS. Rewrite total dari versi Flutter (lihat PROJECT_STATE.md untuk alasan). Teks & checklist, 9 warna kategori, kalender + pengingat, arsip, sampah, kunci PIN/biometrik, 4 mode tampilan (Daftar/Detail/Petak/Petak Besar) dengan tanggal per-kartu, pencarian & pengurutan penuh.
 
 ## Build otomatis (GitHub Actions)
 Push ke `main` -> workflow build & sign APK (native Gradle, tanpa Flutter SDK) -> otomatis terbit sebagai GitHub Release.

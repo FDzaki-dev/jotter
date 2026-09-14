@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
 
-enum class ViewMode { LIST, GRID }
+// v2_Batch54: 2 -> 4 mode (parity dgn menu "Lihat" ColorNote dari video showcase user: Daftar/
+// Detail/Petak/Petak Besar). Nama LIST/GRID sengaja TIDAK diubah (cuma nambah DETAIL & GRID_LARGE)
+// - preferensi lama tersimpan sbg string "LIST"/"GRID" tetap valid lewat valueOf(), 0 migrasi data.
+enum class ViewMode { LIST, DETAIL, GRID, GRID_LARGE }
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val repo = NoteRepository(AppDatabase.getInstance(application).noteDao())
@@ -28,8 +31,14 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     // user pilih List, tapi begitu app di-kill/dibuka ulang balik ke Grid diam2 tanpa pemberitahuan
     // apapun ("selalu fallback ke persegi tanpa konfirmasi", laporan user). Sekarang dibaca dari
     // SharedPreferences saat ViewModel dibuat, ditulis balik tiap kali diubah lewat setViewMode().
+    // valueOf() + try-catch (bukan cuma == "LIST" check spt sebelumnya) - aman kalau value tersimpan
+    // gak dikenal (mis. dari versi app lebih baru yang di-downgrade), fallback diam2 ke GRID.
     val viewMode = MutableStateFlow(
-        if (uiPrefs.getString("view_mode", "GRID") == "LIST") ViewMode.LIST else ViewMode.GRID
+        try {
+            ViewMode.valueOf(uiPrefs.getString("view_mode", ViewMode.GRID.name) ?: ViewMode.GRID.name)
+        } catch (e: IllegalArgumentException) {
+            ViewMode.GRID
+        }
     )
     val searchQuery = MutableStateFlow("")
 

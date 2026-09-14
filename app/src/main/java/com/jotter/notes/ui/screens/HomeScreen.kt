@@ -25,6 +25,7 @@ import com.jotter.notes.backup.BackupManager
 import com.jotter.notes.backup.RestoreResult
 import com.jotter.notes.data.Note
 import com.jotter.notes.data.SortMode
+import com.jotter.notes.ui.components.CardDensity
 import com.jotter.notes.ui.components.NoteCard
 import com.jotter.notes.viewmodel.NotesViewModel
 import com.jotter.notes.viewmodel.ViewMode
@@ -49,6 +50,10 @@ fun HomeScreen(
     val viewMode by viewModel.viewMode.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     var showSortSheet by remember { mutableStateOf(false) }
+    // v2_Batch54: dulu toggle langsung (1 tap = ganti ke mode lawan, cuma 2 kemungkinan). Sekarang
+    // 4 mode (parity video showcase ColorNote "Lihat": Daftar/Detail/Petak/Petak Besar) gak muat
+    // di pola toggle sederhana - butuh sheet pilihan, pola PERSIS sama dgn showSortSheet di atas.
+    var showViewSheet by remember { mutableStateOf(false) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -110,10 +115,8 @@ fun HomeScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = { showSortSheet = true }) { Icon(Icons.Default.Sort, "Urutkan") }
-                    IconButton(onClick = {
-                        viewModel.setViewMode(if (viewMode == ViewMode.GRID) ViewMode.LIST else ViewMode.GRID)
-                    }) {
-                        Icon(if (viewMode == ViewMode.GRID) Icons.Default.ViewList else Icons.Default.GridView, "Tampilan")
+                    IconButton(onClick = { showViewSheet = true }) {
+                        Icon(viewModeIcon(viewMode), "Tampilan")
                     }
                     IconButton(onClick = { onOpenNote(null) }) { Icon(Icons.Default.Add, "Tambah") }
                 }
@@ -175,7 +178,9 @@ fun HomeScreen(
                         modifier = Modifier.padding(horizontal = 32.dp)
                     )
                 }
-            } else if (viewMode == ViewMode.GRID) {
+            } else if (viewMode == ViewMode.GRID || viewMode == ViewMode.GRID_LARGE) {
+                // "Petak" & "Petak Besar" - sama2 grid 2 kolom (Fixed(2) TIDAK diubah, murni ubah
+                // besaran isi kartu lewat CardDensity), beda cuma densitas konten tiap kartu.
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(12.dp),
@@ -187,18 +192,22 @@ fun HomeScreen(
                             note = note,
                             onTap = { onOpenNote(note.id) },
                             onArchive = { archiveWithUndo(note) },
-                            onDelete = { deleteWithUndo(note) }
+                            onDelete = { deleteWithUndo(note) },
+                            density = if (viewMode == ViewMode.GRID_LARGE) CardDensity.LARGE else CardDensity.NORMAL
                         )
                     }
                 }
             } else {
+                // "Daftar" (LIST) & "Detail" - sama2 1 kolom, beda cuma COMPACT (0 preview) vs
+                // NORMAL (preview penuh, perilaku lama).
                 LazyColumn(contentPadding = PaddingValues(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(notes, key = { it.id }) { note ->
                         NoteCard(
                             note = note,
                             onTap = { onOpenNote(note.id) },
                             onArchive = { archiveWithUndo(note) },
-                            onDelete = { deleteWithUndo(note) }
+                            onDelete = { deleteWithUndo(note) },
+                            density = if (viewMode == ViewMode.LIST) CardDensity.COMPACT else CardDensity.NORMAL
                         )
                     }
                 }
@@ -267,4 +276,43 @@ fun HomeScreen(
             }
         }
     }
+
+    // v2_Batch54: sheet pemilih mode tampilan - pola identik showSortSheet di atas (Column+ListItem),
+    // 4 opsi sesuai menu "Lihat" di video showcase ColorNote (Daftar/Detail/Petak/Petak Besar).
+    if (showViewSheet) {
+        ModalBottomSheet(onDismissRequest = { showViewSheet = false }) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Tampilan", style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(12.dp))
+                listOf(
+                    "Daftar" to ViewMode.LIST,
+                    "Detail" to ViewMode.DETAIL,
+                    "Petak" to ViewMode.GRID,
+                    "Petak Besar" to ViewMode.GRID_LARGE
+                ).forEach { (label, mode) ->
+                    val isActive = viewMode == mode
+                    ListItem(
+                        leadingContent = { Icon(viewModeIcon(mode), null) },
+                        headlineContent = { Text(label) },
+                        trailingContent = { if (isActive) Icon(Icons.Default.Check, "Aktif") },
+                        modifier = Modifier.clickable {
+                            viewModel.setViewMode(mode)
+                            showViewSheet = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** v2_Batch54: icon representatif tiap mode - dipakai baik utk icon tombol app-bar (mode aktif)
+ * maupun leading-icon tiap baris di sheet "Tampilan". ViewList/GridView sudah dipakai project ini
+ * sebelumnya (toggle 2-mode lama, terverifikasi ada) - ViewHeadline & Apps murni ikon Material
+ * standar lama (bukan tebakan versi/rename baru), reuse import wildcard `filled.*` yang sudah ada. */
+private fun viewModeIcon(mode: ViewMode): androidx.compose.ui.graphics.vector.ImageVector = when (mode) {
+    ViewMode.LIST -> Icons.Default.ViewHeadline
+    ViewMode.DETAIL -> Icons.Default.ViewList
+    ViewMode.GRID -> Icons.Default.GridView
+    ViewMode.GRID_LARGE -> Icons.Default.Apps
 }

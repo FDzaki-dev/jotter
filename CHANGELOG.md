@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v2_Batch54] - 2026-09-14
+### Added
+- Beranda: tanggal terakhir diubah kini tampil di setiap kartu catatan (sebelumnya tidak pernah dirender)
+- Beranda: mode tampilan diperluas dari 2 (Daftar/Petak) menjadi 4 (Daftar, Detail, Petak, Petak Besar) - dipilih lewat sheet "Tampilan"
+- Kartu checklist yang seluruh itemnya tercentang kini tampil abu-abu + coret (strikethrough) dengan badge centang
+### Changed
+- README.md: deskripsi fitur beranda diperbarui (grid/list -> 4 mode tampilan + tanggal per-kartu)
+
 ## [v2_Batch53] - 2026-08-29
 ### Fixed
 - Theme.kt: tambah override `surfaceContainer*` (Lowest/Low/-/High/Highest) di color scheme tema gradasi - token ini sebelumnya gak disentuh & fallback ke baseline M3 gelap solid, menyebabkan bottom navigation bar (dan ModalBottomSheet) tetap hitam pekat gak nembus gradient di tema Aurora/Senja/Samudra

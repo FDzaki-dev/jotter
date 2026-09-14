@@ -1,5 +1,5 @@
 # MAIN_GOALS — Jotter
-Update terakhir: v2_Batch47 (2026-08-28) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
+Update terakhir: v2_Batch54 (2026-09-14) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
 
 Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfirmasi | ❓ Terimplementasi, belum pernah dites | ⚠️ Deviasi diketahui
 
@@ -13,7 +13,9 @@ Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfir
 | Archive & Trash | ❓ | Belum dites |
 | Lock — PIN | 🔧 | Real device test nemu bug KEAMANAN KRITIS (note terkunci bisa dibuka tanpa PIN sama sekali, Batch13) — sudah difix, BELUM ada konfirmasi eksplisit final pasca-fix |
 | Lock — Biometric | 🔧 | Sama dgn Lock—PIN di atas (1 gerbang verifikasi yang sama) |
-| Grid/List toggle | ✅ | Dikonfirmasi user pasca-fix persist Batch48 — gak fallback ke Grid lagi setelah app restart |
+| Grid/List toggle | 🔧 | Diperluas Batch54 dari 2 mode → 4 mode (Daftar/Detail/Petak/Petak Besar, video showcase ColorNote user) — persist Batch48 tetap berlaku (valueOf() thd string lama), TAPI 4-mode barunya sendiri BELUM ada konfirmasi device |
+| Tanggal di kartu note (beranda) | 🔧 | Baru ditambah Batch54 — sebelumnya TIDAK PERNAH dirender sama sekali di kartu manapun, gap vs video showcase. Belum dites |
+| Checklist tuntas (visual gray+strikethrough) | 🔧 | Baru ditambah Batch54 (video showcase) — belum dites |
 | In-app updater (cek/unduh/pasang) | ❓ | Kode lengkap end-to-end (infra Batch8 → logic Batch9 → UI Batch10), belum pernah dites di HP. Beda dgn "Lihat Rilis di GitHub" (shortcut browser, Batch28) — itu bukan alur auto-update-nya sendiri |
 | Backup & Restore data | 🔧 | Siklus real device intensif Batch39-46: auto-detect restore (MediaStore) terbukti gak reliable di device user (OEM/XOS quirk, dikonfirmasi via tes terkontrol backup→hapus data→restore Batch44) → fallback SAF manual dibangun (Batch42) tapi sempat crash (fix Batch43) → dialog konfirmasi ditambah semua aksi backup/restore (Batch46). Backup Data (tulis) sendiri belum ada laporan gagal |
 | **Pin catatan ke status bar** | 🔧 | Slice 1/3 (data layer) selesai v2_Batch36. Slice 2/3 (notification layer) & 3/3 (tombol pin di UI) BELUM dikerjakan — lihat Pending Queue `PROJECT_STATE.md` |

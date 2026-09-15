@@ -1,5 +1,5 @@
 # MAIN_GOALS — Jotter
-Update terakhir: v2_Batch58 (2026-09-14) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
+Update terakhir: v2_Batch59 (2026-09-14) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
 
 Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfirmasi | ❓ Terimplementasi, belum pernah dites | ⚠️ Deviasi diketahui
 
@@ -15,8 +15,8 @@ Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfir
 | Lock — Biometric | 🔧 | Sama dgn Lock—PIN di atas (1 gerbang verifikasi yang sama) |
 | Grid/List toggle | ✅ | Recording Batch58 KONFIRMASI VISUAL: kolom Petak=3 benar, sheet Tampilan/Urutkan solid opaque. 4 iterasi (54-57) akhirnya terbukti bekerja di device nyata |
 | Sheet "Tampilan"/"Urutkan" - readability | ✅ | Dikonfirmasi VISUAL solid opaque di recording Batch58 (screenshot langsung, bukan asumsi kode) |
-| Dialog konfirmasi/updater (AlertDialog) - readability | 🔧 | BARU (Batch58): 11 AlertDialog (7 di UpdateDialog.kt + 4 di SettingsScreen.kt) sama-sama gak pernah di-set containerColor, transparan di tema gradasi (bug keluarga sama dgn NoteCard/Sheet). Di-fix. Belum dites device |
-| Transisi navigasi (tab-switch & back-navigation) | 🔧 | BARU (Batch58): dikonfirmasi VISUAL ghosting nyata (bukan cuma dugaan Batch57) - konten layar lama numpuk transparan pas transisi. Di-fix dgn matikan animasi (instan). Belum dites device |
+| Dialog konfirmasi/updater (AlertDialog) - readability | ✅ | User konfirmasi eksplisit Batch59: "(1) ✅" — fix Batch58 beres |
+| Transisi navigasi (tab-switch & back-navigation) | 🔧 | Batch58: fix instan total (structurally correct tapi kerasa kaku, feedback user). Batch59: kompromi exit-instan+enter-fade-150ms (tetap structurally 0 ghosting, tapi lebih halus). Belum dites device |
 | Tab-switch ghosting (Kalender/Catatan/Pengaturan) | ✅ | Naik status dari ❓(Batch57, observasi belum pasti) → dikonfirmasi bug nyata di Batch58 & sudah di-fix (lihat baris "Transisi navigasi" di atas) |
 | Tanggal di kartu note (beranda) | 🔧 | Batch54: ditambah di Daftar/Detail. Batch55: SENGAJA disembunyikan lagi khusus di Petak/Petak Besar (bikin sesak, video referensi 0 tanggal di grid) — di Daftar/Detail tetap tampil. Belum dites device |
 | Checklist tuntas (visual gray+strikethrough) | 🔧 | Ditambah Batch54, dikonfirmasi tetap berlaku di mode grid juga (Batch55, sesuai video referensi ke-2) — belum dites device |

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v2_Batch59] - 2026-09-14
+### Changed
+- Transisi berpindah tab dan kembali dari layar catatan kini pakai fade halus singkat (bukan instan kaku seperti sebelumnya), tanpa memunculkan lagi masalah tampilan bertumpuk
+
 ## [v2_Batch58] - 2026-09-14
 ### Fixed
 - Dialog pembaruan aplikasi ("Sudah Terbaru" dan lainnya di bagian Pembaruan/Download) kini punya latar solid - sebelumnya tembus pandang di tema gradasi

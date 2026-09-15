@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v2_Batch58] - 2026-09-14
+### Fixed
+- Dialog pembaruan aplikasi ("Sudah Terbaru" dan lainnya di bagian Pembaruan/Download) kini punya latar solid - sebelumnya tembus pandang di tema gradasi
+- Dialog konfirmasi lain (Pulihkan dari Backup, Matikan Kunci PIN, Backup Sekarang, Pulihkan dari File) juga diperbaiki dengan masalah yang sama
+- Transisi berpindah tab (Catatan/Kalender/Pengaturan) dan kembali dari layar catatan kini instan - sebelumnya sempat menampilkan konten layar sebelumnya bertumpuk transparan selama animasi
+
 ## [v2_Batch57] - 2026-09-14
 ### Fixed
 - Sheet "Tampilan" dan "Urutkan" (muncul dari beranda) kini punya latar solid - sebelumnya nyaris tembus pandang di tema gradasi (Aurora/Senja/Samudra) sehingga tulisan menu bertumpuk dengan konten di belakangnya dan sulit dibaca

@@ -12,11 +12,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jotter.notes.updater.ReleaseAsset
 import com.jotter.notes.viewmodel.UpdaterUiState
 import java.io.File
+
+// v2_Batch58: FIX bug "regresi visual di tab download" yang dilaporkan user - dialog updater
+// (termasuk "Sudah Terbaru" yang persis kelihatan transparan di recording: teks "Pilih File Backup
+// Manual" di layar belakangnya kebaca tembus) gak pernah di-set `containerColor`, jatuh ke default
+// M3 `AlertDialogDefaults.containerColor` = token `surfaceContainerHigh`, yang di tema gradasi
+// (Aurora/Senja/Samudra, `Theme.kt`) transparan by design (sama akar masalah dgn NoteCard.kt
+// Batch56 & ModalBottomSheet Batch57 - instance ke-3 dari bug keluarga yang sama). Konstanta ini
+// SENGAJA diduplikasi (bukan di-share dari HomeScreen.kt) biar fix ini tetap 1 file yg
+// disentuh - lihat PROJECT_STATE.md Batch58 utk catatan konsolidasi ke Color.kt di masa depan.
+private val OpaqueDialogContainer = Color(0xFF242426)
 
 /**
  * Dialog rounded/minimal (cupertino-look, konsisten dgn JotterShapes bawaan AlertDialog Material3)
@@ -35,6 +46,7 @@ fun UpdateDialog(
     when (state) {
         is UpdaterUiState.Available -> AlertDialog(
             onDismissRequest = onDismiss,
+            containerColor = OpaqueDialogContainer,
             title = { Text("Pembaruan Tersedia") },
             text = {
                 Column(Modifier.fillMaxWidth()) {
@@ -65,6 +77,7 @@ fun UpdateDialog(
 
         is UpdaterUiState.NoMatchingAsset -> AlertDialog(
             onDismissRequest = onDismiss,
+            containerColor = OpaqueDialogContainer,
             title = { Text("Pembaruan Tersedia") },
             text = { Text("Rilis ${state.release.tagName} ditemukan, tapi tidak ada APK yang cocok dengan arsitektur perangkat ini.") },
             confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } }
@@ -72,6 +85,7 @@ fun UpdateDialog(
 
         is UpdaterUiState.Downloading -> AlertDialog(
             onDismissRequest = {}, // non-dismissable selama unduhan berjalan
+            containerColor = OpaqueDialogContainer,
             title = { Text("Mengunduh Pembaruan") },
             text = {
                 Column(Modifier.fillMaxWidth().padding(top = 8.dp)) {
@@ -92,6 +106,7 @@ fun UpdateDialog(
 
         is UpdaterUiState.ReadyToInstall -> AlertDialog(
             onDismissRequest = onDismiss,
+            containerColor = OpaqueDialogContainer,
             title = { Text("Siap Dipasang") },
             text = { Text("Pembaruan sudah selesai diunduh. Lanjutkan proses instalasi?") },
             confirmButton = {
@@ -102,6 +117,7 @@ fun UpdateDialog(
 
         is UpdaterUiState.UpToDate -> AlertDialog(
             onDismissRequest = onDismiss,
+            containerColor = OpaqueDialogContainer,
             title = { Text("Sudah Terbaru") },
             text = { Text("Kamu sudah memakai versi terbaru Jotter.") },
             confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } }
@@ -109,6 +125,7 @@ fun UpdateDialog(
 
         is UpdaterUiState.CheckError -> AlertDialog(
             onDismissRequest = onDismiss,
+            containerColor = OpaqueDialogContainer,
             title = { Text("Gagal Memeriksa Pembaruan") },
             text = { Text(state.message) },
             confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } }
@@ -116,6 +133,7 @@ fun UpdateDialog(
 
         is UpdaterUiState.DownloadError -> AlertDialog(
             onDismissRequest = onDismiss,
+            containerColor = OpaqueDialogContainer,
             title = { Text("Gagal Mengunduh") },
             text = { Text(state.message) },
             confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } }

@@ -1,5 +1,5 @@
 # MAIN_GOALS — Jotter
-Update terakhir: v2_Batch59 (2026-09-14) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
+Update terakhir: v2_Batch60 (2026-09-16) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
 
 Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfirmasi | ❓ Terimplementasi, belum pernah dites | ⚠️ Deviasi diketahui
 
@@ -16,7 +16,7 @@ Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfir
 | Grid/List toggle | ✅ | Recording Batch58 KONFIRMASI VISUAL: kolom Petak=3 benar, sheet Tampilan/Urutkan solid opaque. 4 iterasi (54-57) akhirnya terbukti bekerja di device nyata |
 | Sheet "Tampilan"/"Urutkan" - readability | ✅ | Dikonfirmasi VISUAL solid opaque di recording Batch58 (screenshot langsung, bukan asumsi kode) |
 | Dialog konfirmasi/updater (AlertDialog) - readability | ✅ | User konfirmasi eksplisit Batch59: "(1) ✅" — fix Batch58 beres |
-| Transisi navigasi (tab-switch & back-navigation) | 🔧 | Batch58: fix instan total (structurally correct tapi kerasa kaku, feedback user). Batch59: kompromi exit-instan+enter-fade-150ms (tetap structurally 0 ghosting, tapi lebih halus). Belum dites device |
+| Transisi navigasi (tab-switch & back-navigation) | ❗ | Batch59 (fade compromise) TERNYATA regresi PARAH (asumsi soal ExitTransition.None salah - overlap 100%, bukan cuma sekilas). Batch60: REVERT DARURAT ke Batch58 (None+None, terbukti 0 overlap). Transisi instan lagi (bukan fade). Belum dites device pasca-revert - prioritas #1 |
 | Tab-switch ghosting (Kalender/Catatan/Pengaturan) | ✅ | Naik status dari ❓(Batch57, observasi belum pasti) → dikonfirmasi bug nyata di Batch58 & sudah di-fix (lihat baris "Transisi navigasi" di atas) |
 | Tanggal di kartu note (beranda) | 🔧 | Batch54: ditambah di Daftar/Detail. Batch55: SENGAJA disembunyikan lagi khusus di Petak/Petak Besar (bikin sesak, video referensi 0 tanggal di grid) — di Daftar/Detail tetap tampil. Belum dites device |
 | Checklist tuntas (visual gray+strikethrough) | 🔧 | Ditambah Batch54, dikonfirmasi tetap berlaku di mode grid juga (Batch55, sesuai video referensi ke-2) — belum dites device |

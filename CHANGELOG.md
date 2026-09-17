@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v2_Batch60] - 2026-09-16
+### Fixed
+- REVERT DARURAT: perubahan transisi di versi sebelumnya (v2_Batch59) ternyata menyebabkan tampilan dua layar bertumpuk penuh saat berpindah tab - dikembalikan ke transisi instan (v2_Batch58) yang sudah terbukti tidak bermasalah
+
 ## [v2_Batch59] - 2026-09-14
 ### Changed
 - Transisi berpindah tab dan kembali dari layar catatan kini pakai fade halus singkat (bukan instan kaku seperti sebelumnya), tanpa memunculkan lagi masalah tampilan bertumpuk

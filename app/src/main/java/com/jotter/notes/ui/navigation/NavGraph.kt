@@ -1,8 +1,7 @@
 package com.jotter.notes.ui.navigation
 
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -65,20 +64,21 @@ fun MainTabScaffold(rootNavController: androidx.navigation.NavHostController) {
             }
         }
     ) { padding ->
-        // v2_Batch59: user minta kompromi "fade pendek + opaque" drpd instan total (Batch58).
-        // Mekanisme: EXIT tetap None (layar lama HILANG SEKETIKA, bukan fade-out) - ini yang
-        // secara struktural mencegah 2 layar transparan tumpang tindih (akar bug ghosting Batch58
-        // gak mungkin kejadian lagi krn gak pernah ada momen dua-duanya kelihatan bersamaan).
-        // ENTER dikasih fade 150ms - layar baru muncul dgn transisi halus di atas gradient root
-        // (yang sendirinya statis/gak ikut animasi, jadi bukan "opaque" literal, tapi efeknya
-        // sama: gak ada teks/kartu numpuk teks/kartu lain, cuma satu konten yang fade-in sendirian).
+        // v2_Batch60: REVERT Batch59. Asumsi Batch59 SALAH: `ExitTransition.None` BUKAN "hilang
+        // seketika" - artinya "konten lama TETAP TAMPIL PENUH tanpa animasi" selama durasi
+        // transisi berjalan (AnimatedContent nge-render exit+enter side bersamaan kalau SALAH
+        // SATU sisi py durasi animasi aktif). Kombinasi exit=None + enter=fadeIn(150ms) = layar
+        // lama diam full-opacity SELAMA 150ms sementara layar baru fade-in DI ATASNYA - overlap
+        // parah (dikonfirmasi user via recording: "Kalender"+"Catatan" numpuk penuh, bukan cuma
+        // sekilas). Satu2nya kombinasi yang bener2 terbukti 0 overlap: KEDUA sisi None (Batch58) -
+        // itu bikin swap instan tanpa window animasi sama sekali. Balik ke situ.
         NavHost(
             navController = tabNavController,
             startDestination = Routes.HOME,
             modifier = androidx.compose.ui.Modifier.padding(padding),
-            enterTransition = { fadeIn(animationSpec = tween(150)) },
+            enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
-            popEnterTransition = { fadeIn(animationSpec = tween(150)) },
+            popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
             composable(Routes.HOME) {
@@ -105,14 +105,13 @@ fun JotterNavGraph() {
     val rootNavController = rememberNavController()
     val startDestination = if (auth.hasPinSet()) Routes.LOCK_VERIFY else Routes.UNLOCKED_ROOT
 
-    // v2_Batch59: kompromi sama persis dgn NavHost tab di atas - lihat komentar di sana utk
-    // penjelasan mekanisme "exit instan + enter fade pendek".
+    // v2_Batch60: revert sama persis dgn NavHost tab di atas - lihat komentar di sana.
     NavHost(
         navController = rootNavController,
         startDestination = startDestination,
-        enterTransition = { fadeIn(animationSpec = tween(150)) },
+        enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
-        popEnterTransition = { fadeIn(animationSpec = tween(150)) },
+        popEnterTransition = { EnterTransition.None },
         popExitTransition = { ExitTransition.None }
     ) {
         composable(Routes.UNLOCKED_ROOT) { MainTabScaffold(rootNavController) }

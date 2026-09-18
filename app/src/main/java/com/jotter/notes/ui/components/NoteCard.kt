@@ -19,23 +19,13 @@ import androidx.compose.ui.unit.dp
 import com.jotter.notes.data.Note
 import com.jotter.notes.data.NoteType
 import com.jotter.notes.ui.theme.JotterSecondaryLabel
+import com.jotter.notes.ui.theme.JotterSurface
 import com.jotter.notes.ui.theme.noteColorFor
 import java.util.Calendar
 
-// v2_Batch56: FIX bug nyata dari "fix" Batch55 sendiri. Batch55 ganti basis lerp dari konstanta
-// hardcode ke `MaterialTheme.colorScheme.surface` dgn TEORI "biar ikut tema aktif" - TAPI gak
-// pernah dicek nilai literal token itu utk 3 dari 4 tema (Aurora/Senja/Samudra): `surface =
-// Color(0x1FFFFFFF)` alias PUTIH DI ALPHA CUMA 12% (lihat Theme.kt - ini token "glassmorphism",
-// sengaja transparan biar gradient background nembus, BUKAN warna solid biasa). `lerp()` ikut
-// nge-interpolasi channel ALPHA juga - hasilnya kartu jadi 30-40% opacity doang, warna &
-// kontrasnya jadi TERGANTUNG apa yang ada di belakangnya (gradient warna-warni Aurora/Senja/
-// Samudra) - itu sebabnya user lapor background/font/label SEMUA buruk pasca-Batch55 (bukan
-// membaik, malah lebih gak predictable dari Batch54). FIX: pisahkan total dari token surface
-// manapun - kartu note butuh backing SELALU OPAQUE biar teks di atasnya SELALU kebaca, gak
-// peduli tema/gradient apa yang aktif di baliknya. Trade-off sadar: kartu jadi flat/solid, gak
-// ikut efek glassmorphism tema gradasi (itu memang utk chrome/sheet, bukan utk konten note).
-private val OpaqueCardBase = Color(0xFF1C1C1E)
-
+// v2_Batch61: local `OpaqueCardBase` (nilai 0xFF1C1C1E, alasan lengkap kenapa harus opaque - lihat
+// Batch56 - dipindah ke Color.kt) dikonsolidasi ke `JotterSurface` yang sudah ada di Color.kt,
+// nilai literalnya PERSIS SAMA - 0 perubahan visual, cuma hapus duplikat.
 enum class CardDensity { COMPACT, DETAIL, GRID, GRID_LARGE }
 
 // Native Compose swipe-to-reveal-actions - real gesture handling via SwipeToDismissBox,
@@ -93,11 +83,11 @@ fun NoteCard(
 @Composable
 private fun NoteCardContent(note: Note, onTap: () -> Unit, density: CardDensity) {
     val accentColor = noteColorFor(note.colorIndex)
-    // v2_Batch56: OpaqueCardBase (selalu 100% opacity, lihat komentar top-of-file) - BUKAN lagi
-    // MaterialTheme.colorScheme.surface (Batch55, bug) ATAUPUN JotterSurface (Batch25-54, benar
-    // secara kebetulan krn AMOLED-only, tapi gak eksplisit/gak didokumentasi KENAPA harus opaque).
-    // Fraksi lerp naik lagi 0.24 -> 0.32 - identitas warna kategori makin jelas dibedakan.
-    val cardBackground = lerp(OpaqueCardBase, accentColor, 0.32f)
+    // v2_Batch56: base warna kartu SELALU opaque (bukan MaterialTheme.colorScheme.surface yg
+    // transparan di tema gradasi - lihat riwayat Batch56 di PROJECT_STATE.md utk detail lengkap).
+    // v2_Batch61: sumbernya `JotterSurface` (Color.kt, dikonsolidasi dari local OpaqueCardBase,
+    // nilai sama). Fraksi lerp 0.32 - identitas warna kategori makin jelas dibedakan.
+    val cardBackground = lerp(JotterSurface, accentColor, 0.32f)
 
     // Checklist "semua item tercentang" - treatment visual grayed-out+strikethrough + badge
     // centang, meniru kartu "Daftar barang" di video showcase (berlaku di semua mode termasuk grid).

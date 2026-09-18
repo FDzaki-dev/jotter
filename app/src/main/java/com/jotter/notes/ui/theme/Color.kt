@@ -21,9 +21,19 @@ fun noteColorFor(index: Int): Color =
     if (index in NoteColors.indices) NoteColors[index].color else NoteColors[0].color
 
 val JotterBackground = Color(0xFF000000)
+// v2_Batch61: juga dipakai NoteCard.kt sbg base warna kartu opaque (konsolidasi dari duplikat
+// lokal `OpaqueCardBase`, nilai literal sama persis - lihat riwayat Batch56 utk alasan opaque).
 val JotterSurface = Color(0xFF1C1C1E)
 val JotterSurfaceElevated = Color(0xFF2C2C2E)
 val JotterLabel = Color(0xFFFFFFFF)
+
+// v2_Batch61: konsolidasi 3 duplikat lokal identik (OpaqueSheetContainer di HomeScreen.kt,
+// OpaqueDialogContainer di UpdateDialog.kt, OpaqueSettingsDialogContainer di SettingsScreen.kt),
+// semua 0xFF242426. Dipakai backing solid ModalBottomSheet & AlertDialog di tema gradasi (token
+// M3 surface transparan by design utk glassmorphism - lihat Batch56-58). SENGAJA BEDA dari
+// `JotterSurface` (0xFF1C1C1E, dipakai NoteCard) - 2 shade berbeda by design, JANGAN digabung.
+// Migrasi UpdateDialog.kt & SettingsScreen.kt masih pending (lihat PROJECT_STATE.md Batch61).
+val OpaqueSurfaceContainer = Color(0xFF242426)
 // v2_Batch56: nilai lama (0xFF8E8E93) itu warna "secondaryLabel" iOS mode TERANG (didesain utk
 // teks di atas background PUTIH) - dipakai di app yang 100% GELAP (JotterBackground hitam),
 // kontrasnya jelek (abu-gelap di atas gelap). Constant ini SEBELUMNYA 0 DIPAKAI DI MANAPUN

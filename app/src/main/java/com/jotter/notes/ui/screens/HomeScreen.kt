@@ -16,7 +16,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -28,6 +27,7 @@ import com.jotter.notes.data.Note
 import com.jotter.notes.data.SortMode
 import com.jotter.notes.ui.components.CardDensity
 import com.jotter.notes.ui.components.NoteCard
+import com.jotter.notes.ui.theme.OpaqueSurfaceContainer
 import com.jotter.notes.viewmodel.NotesViewModel
 import com.jotter.notes.viewmodel.ViewMode
 import kotlinx.coroutines.Dispatchers
@@ -40,16 +40,10 @@ import kotlinx.coroutines.withContext
  * baru. Reset otomatis tiap proses app baru (cold start) — itu memang semantik yang diinginkan. */
 private var restoreCheckDoneThisProcess = false
 
-// v2_Batch57: FIX bug nyata dari laporan user "regresi dibagian background text" - `ModalBottomSheet`
-// (baik "Urutkan" MAUPUN "Tampilan") gak pernah di-set `containerColor`-nya secara eksplisit, jadi
-// dia jatuh ke default M3 `BottomSheetDefaults.ContainerColor` = token `surfaceContainerLow`. Utk
-// tema gradasi (Aurora/Senja/Samudra), `Theme.kt` set token itu ke `Color(0x1FFFFFFF)` (putih alpha
-// 12% - SAMA PERSIS akar bug yang sudah di-fix di NoteCard.kt Batch56, ternyata ada instance KE-2
-// yang kelewat: sheet-nya sendiri, bukan cuma kartu). Efeknya: teks "Tampilan/Daftar/Detail/Petak/
-// Petak Besar" dirender nyaris tanpa backing opaque, jadi visually numpuk sama konten layar di
-// belakangnya (kartu note, bottom nav) - persis "background text" yang dilaporkan user, HARUS
-// dipisah dari token surface manapun, sama seperti OpaqueCardBase.
-private val OpaqueSheetContainer = Color(0xFF242426)
+// v2_Batch57: FIX bug nyata "background text" - `ModalBottomSheet` ("Urutkan"/"Tampilan") gak
+// pernah di-set `containerColor`, jatuh ke token M3 transparan (lihat riwayat Batch56-57 di
+// PROJECT_STATE.md). v2_Batch61: constant-nya (`OpaqueSheetContainer`) dikonsolidasi ke
+// `OpaqueSurfaceContainer` di Color.kt (nilai sama, 0xFF242426, dipakai bareng UpdateDialog.kt).
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -265,7 +259,7 @@ fun HomeScreen(
     }
 
     if (showSortSheet) {
-        ModalBottomSheet(onDismissRequest = { showSortSheet = false }, containerColor = OpaqueSheetContainer) {
+        ModalBottomSheet(onDismissRequest = { showSortSheet = false }, containerColor = OpaqueSurfaceContainer) {
             Column(Modifier.padding(16.dp)) {
                 Text("Urutkan berdasarkan", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(12.dp))
@@ -295,7 +289,7 @@ fun HomeScreen(
     // v2_Batch54: sheet pemilih mode tampilan - pola identik showSortSheet di atas (Column+ListItem),
     // 4 opsi sesuai menu "Lihat" di video showcase ColorNote (Daftar/Detail/Petak/Petak Besar).
     if (showViewSheet) {
-        ModalBottomSheet(onDismissRequest = { showViewSheet = false }, containerColor = OpaqueSheetContainer) {
+        ModalBottomSheet(onDismissRequest = { showViewSheet = false }, containerColor = OpaqueSurfaceContainer) {
             Column(Modifier.padding(16.dp)) {
                 Text("Tampilan", style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(12.dp))
@@ -325,9 +319,12 @@ fun HomeScreen(
  * maupun leading-icon tiap baris di sheet "Tampilan". ViewList/GridView sudah dipakai project ini
  * sebelumnya (toggle 2-mode lama, terverifikasi ada) - ViewHeadline & Apps murni ikon Material
  * standar lama (bukan tebakan versi/rename baru), reuse import wildcard `filled.*` yang sudah ada. */
+// v2_Batch61: FIX temuan Batch58 - "Petak" (GRID, 3 kolom kecil) & "Petak Besar" (GRID_LARGE,
+// 2 kolom besar) kepasang ikon kebalik (GridView = kesan 2x2 besar, Apps = kesan 3x3 kecil).
+// Ditukar biar ikon match jumlah kolom sebenarnya.
 private fun viewModeIcon(mode: ViewMode): androidx.compose.ui.graphics.vector.ImageVector = when (mode) {
     ViewMode.LIST -> Icons.Default.ViewHeadline
     ViewMode.DETAIL -> Icons.Default.ViewList
-    ViewMode.GRID -> Icons.Default.GridView
-    ViewMode.GRID_LARGE -> Icons.Default.Apps
+    ViewMode.GRID -> Icons.Default.Apps
+    ViewMode.GRID_LARGE -> Icons.Default.GridView
 }

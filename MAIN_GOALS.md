@@ -1,5 +1,5 @@
 # MAIN_GOALS — Jotter
-Update terakhir: v2_Batch60 (2026-09-16) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
+Update terakhir: v2_Batch61 (2026-09-18) — status disinkronkan ulang thd bukti nyata di riwayat batch (bukan cuma "ditulis ulang, belum dites" blanket dari v2_Batch1).
 
 Legenda: ✅ Terverifikasi di HP | 🔧 Diperbaiki/ditulis ulang, belum dikonfirmasi | ❓ Terimplementasi, belum pernah dites | ⚠️ Deviasi diketahui
 

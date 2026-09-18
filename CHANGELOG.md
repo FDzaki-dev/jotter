@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v2_Batch61] - 2026-09-18
+### Fixed
+- Ikon mode tampilan "Petak" dan "Petak Besar" (di menu Tampilan) kini sesuai - sebelumnya ikonnya tertukar antara keduanya
+
 ## [v2_Batch60] - 2026-09-16
 ### Fixed
 - REVERT DARURAT: perubahan transisi di versi sebelumnya (v2_Batch59) ternyata menyebabkan tampilan dua layar bertumpuk penuh saat berpindah tab - dikembalikan ke transisi instan (v2_Batch58) yang sudah terbukti tidak bermasalah

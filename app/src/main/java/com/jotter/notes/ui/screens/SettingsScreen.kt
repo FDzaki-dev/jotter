@@ -32,6 +32,7 @@ import com.jotter.notes.backup.BackupResult
 import com.jotter.notes.backup.RestoreResult
 import com.jotter.notes.ui.components.UpdateDialog
 import com.jotter.notes.ui.theme.AppTheme
+import com.jotter.notes.ui.theme.OpaqueSurfaceContainer
 import com.jotter.notes.ui.theme.ThemeManager
 import com.jotter.notes.updater.UpdateChecker
 import com.jotter.notes.viewmodel.SettingsViewModel
@@ -40,12 +41,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-// v2_Batch58: sama akar bug & sama nilai dgn `OpaqueDialogContainer` di UpdateDialog.kt/
-// `OpaqueSheetContainer` di HomeScreen.kt - 4 AlertDialog konfirmasi/backup di layar ini pakai
-// pola & bug yang identik (default containerColor jatuh ke token surfaceContainerHigh yang
-// transparan di tema gradasi). Diduplikasi per-file (bukan 1 constant di-share) sesuai catatan
-// di UpdateDialog.kt - konsolidasi ke Color.kt bisa jadi cleanup batch terpisah nanti.
-private val OpaqueSettingsDialogContainer = Color(0xFF242426)
+// v2_Batch58: sama akar bug dgn OpaqueDialogContainer (UpdateDialog.kt) & OpaqueSheetContainer
+// (HomeScreen.kt) - AlertDialog konfirmasi/backup di layar ini butuh containerColor eksplisit
+// (default token M3 transparan di tema gradasi). v2_Batch61: dikonsolidasi ke
+// `OpaqueSurfaceContainer` di Color.kt.
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -311,7 +310,7 @@ fun SettingsScreen(
     pendingRestore?.let { info ->
         AlertDialog(
             onDismissRequest = { pendingRestore = null },
-            containerColor = OpaqueSettingsDialogContainer,
+            containerColor = OpaqueSurfaceContainer,
             title = { Text("Pulihkan dari Backup?") },
             text = {
                 val dateStr = java.text.SimpleDateFormat("d MMM yyyy, HH:mm", java.util.Locale("id", "ID"))
@@ -339,7 +338,7 @@ fun SettingsScreen(
     if (pendingDisablePin) {
         AlertDialog(
             onDismissRequest = { pendingDisablePin = false },
-            containerColor = OpaqueSettingsDialogContainer,
+            containerColor = OpaqueSurfaceContainer,
             title = { Text("Matikan Kunci PIN?") },
             text = { Text("Aplikasi tidak lagi meminta PIN/biometrik saat dibuka. Catatan yang masih terkunci butuh PIN baru lagi nanti untuk dibuka. Lanjutkan?") },
             confirmButton = {
@@ -364,7 +363,7 @@ fun SettingsScreen(
     if (showBackupConfirm) {
         AlertDialog(
             onDismissRequest = { showBackupConfirm = false },
-            containerColor = OpaqueSettingsDialogContainer,
+            containerColor = OpaqueSurfaceContainer,
             title = { Text("Backup Sekarang?") },
             text = { Text("Simpan salinan semua catatan ke Documents/Jotter/backup. Catatan terkunci disimpan tanpa isi asli, demi keamanan. Lanjutkan?") },
             confirmButton = {
@@ -391,7 +390,7 @@ fun SettingsScreen(
     pendingManualRestoreUri?.let { uri ->
         AlertDialog(
             onDismissRequest = { pendingManualRestoreUri = null },
-            containerColor = OpaqueSettingsDialogContainer,
+            containerColor = OpaqueSurfaceContainer,
             title = { Text("Pulihkan dari File Ini?") },
             text = { Text("Catatan dari file yang dipilih akan ditambahkan ke catatan yang ada sekarang (catatan dengan ID sama akan ditimpa versi backup). Lanjutkan?") },
             confirmButton = {
